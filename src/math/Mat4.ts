@@ -2,11 +2,12 @@ import { Vec4 } from "./Vec4";
 import { Quat } from "./Quat";
 
 export class Mat4 {
-    public d: number[][] = [];
+    public d: number[][];
 
     public constructor() {
+        this.d = new Array<number[]>(4);
         for (let i = 0; i < 4; i++) {
-            this.d[i] = [];
+            this.d[i] = new Array<number>(4);
             for (let j = 0; j < 4; j++) {
                 this.d[i][j] = 0;
             }

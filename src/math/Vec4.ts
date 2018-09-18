@@ -5,6 +5,34 @@ export class Vec4 {
         this.d = [x, y, z, w];
     }
 
+    get x(): number {
+        return this.d[0];
+    }
+    set x(v: number) {
+        this.d[0] = v;
+    }
+
+    get y(): number {
+        return this.d[1];
+    }
+    set y(v: number) {
+        this.d[1] = v;
+    }
+
+    get z(): number {
+        return this.d[2];
+    }
+    set z(v: number) {
+        this.d[2] = v;
+    }
+
+    get w(): number {
+        return this.d[3];
+    }
+    set w(v: number) {
+        this.d[3] = v;
+    }
+
     public add(rhs: Vec4): Vec4 {
         let res = new Vec4();
         res.d[0] = this.d[0] + rhs.d[0];

@@ -10,6 +10,34 @@ export class Quat {
         this.d[3] = w;
     }
 
+    get x(): number {
+        return this.d[0];
+    }
+    set x(v: number) {
+        this.d[0] = v;
+    }
+
+    get y(): number {
+        return this.d[1];
+    }
+    set y(v: number) {
+        this.d[1] = v;
+    }
+
+    get z(): number {
+        return this.d[2];
+    }
+    set z(v: number) {
+        this.d[2] = v;
+    }
+
+    get w(): number {
+        return this.d[3];
+    }
+    set w(v: number) {
+        this.d[3] = v;
+    }
+
     public static fromAxisAngle(axis: Vec4, rad: number) {
         rad = rad * 0.5;
         let s = Math.sin(rad);

@@ -4,4 +4,5 @@ export class color {
     public g : number;
     public b : number;
     public a : number;
+    
 }

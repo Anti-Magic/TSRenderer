@@ -1,5 +1,7 @@
 import { FrameBuffer } from "./FrameBuffer";
 import { Vec4 } from "./math/Vec4";
+import { MeshPrimitive } from "./MeshPrimitive";
+import { Draw } from "./Engine/Draw";
 
 let canvas = document.getElementById("canvas") as HTMLCanvasElement;
 let context = canvas.getContext("2d");
@@ -13,11 +15,13 @@ for (let y = 0; y < height; y++) {
 	}
 }
 
+Draw.drawLine(fbo, new Vec4(0, 0), new Vec4(300, 300));
+
 let buffer = new ImageData(width, height);
 for (let x = 0; x < width; x++) {
 	for (let y = 0; y < height; y++) {
 		let color = fbo.getColor(new Vec4(x, y));
-		let index = (x + y * width) * 4;
+		let index = (x + (height - y) * width) * 4;
         buffer.data[index] = color.x * 255;
         buffer.data[index + 1] = color.y * 255;
         buffer.data[index + 2] = color.z * 255;
@@ -25,3 +29,6 @@ for (let x = 0; x < width; x++) {
 	}
 }
 context.putImageData(buffer, 0, 0);
+
+let cube = MeshPrimitive.cube();
+console.log(cube.vertices.length);

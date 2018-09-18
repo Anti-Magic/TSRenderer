@@ -29,6 +29,63 @@ export class Mat4 {
         return res;
     }
 
+    public transpose(): Mat4 {
+        let res = new Mat4();
+        res.d[0][0] = this.d[0][0];
+        res.d[0][1] = this.d[1][0];
+        res.d[0][2] = this.d[2][0];
+        res.d[0][3] = this.d[3][0];
+        res.d[1][0] = this.d[0][1];
+        res.d[1][1] = this.d[1][1];
+        res.d[1][2] = this.d[2][1];
+        res.d[1][3] = this.d[3][1];
+        res.d[2][0] = this.d[0][2];
+        res.d[2][1] = this.d[1][2];
+        res.d[2][2] = this.d[2][2];
+        res.d[2][3] = this.d[3][2];
+        res.d[3][0] = this.d[0][3];
+        res.d[3][1] = this.d[1][3];
+        res.d[3][2] = this.d[2][3];
+        res.d[3][3] = this.d[3][3];
+        return res;
+    }
+
+    public inverse(): Mat4 {
+        let res = new Mat4();
+        res.d[0][0] = this.d[1][2]*this.d[2][3]*this.d[3][1] - this.d[1][3]*this.d[2][2]*this.d[3][1] + this.d[1][3]*this.d[2][1]*this.d[3][2] - this.d[1][1]*this.d[2][3]*this.d[3][2] - this.d[1][2]*this.d[2][1]*this.d[3][3] + this.d[1][1]*this.d[2][2]*this.d[3][3];
+        res.d[0][1] = this.d[0][3]*this.d[2][2]*this.d[3][1] - this.d[0][2]*this.d[2][3]*this.d[3][1] - this.d[0][3]*this.d[2][1]*this.d[3][2] + this.d[0][1]*this.d[2][3]*this.d[3][2] + this.d[0][2]*this.d[2][1]*this.d[3][3] - this.d[0][1]*this.d[2][2]*this.d[3][3];
+        res.d[0][2] = this.d[0][2]*this.d[1][3]*this.d[3][1] - this.d[0][3]*this.d[1][2]*this.d[3][1] + this.d[0][3]*this.d[1][1]*this.d[3][2] - this.d[0][1]*this.d[1][3]*this.d[3][2] - this.d[0][2]*this.d[1][1]*this.d[3][3] + this.d[0][1]*this.d[1][2]*this.d[3][3];
+        res.d[0][3] = this.d[0][3]*this.d[1][2]*this.d[2][1] - this.d[0][2]*this.d[1][3]*this.d[2][1] - this.d[0][3]*this.d[1][1]*this.d[2][2] + this.d[0][1]*this.d[1][3]*this.d[2][2] + this.d[0][2]*this.d[1][1]*this.d[2][3] - this.d[0][1]*this.d[1][2]*this.d[2][3];
+        res.d[1][0] = this.d[1][3]*this.d[2][2]*this.d[3][0] - this.d[1][2]*this.d[2][3]*this.d[3][0] - this.d[1][3]*this.d[2][0]*this.d[3][2] + this.d[1][0]*this.d[2][3]*this.d[3][2] + this.d[1][2]*this.d[2][0]*this.d[3][3] - this.d[1][0]*this.d[2][2]*this.d[3][3];
+        res.d[1][1] = this.d[0][2]*this.d[2][3]*this.d[3][0] - this.d[0][3]*this.d[2][2]*this.d[3][0] + this.d[0][3]*this.d[2][0]*this.d[3][2] - this.d[0][0]*this.d[2][3]*this.d[3][2] - this.d[0][2]*this.d[2][0]*this.d[3][3] + this.d[0][0]*this.d[2][2]*this.d[3][3];
+        res.d[1][2] = this.d[0][3]*this.d[1][2]*this.d[3][0] - this.d[0][2]*this.d[1][3]*this.d[3][0] - this.d[0][3]*this.d[1][0]*this.d[3][2] + this.d[0][0]*this.d[1][3]*this.d[3][2] + this.d[0][2]*this.d[1][0]*this.d[3][3] - this.d[0][0]*this.d[1][2]*this.d[3][3];
+        res.d[1][3] = this.d[0][2]*this.d[1][3]*this.d[2][0] - this.d[0][3]*this.d[1][2]*this.d[2][0] + this.d[0][3]*this.d[1][0]*this.d[2][2] - this.d[0][0]*this.d[1][3]*this.d[2][2] - this.d[0][2]*this.d[1][0]*this.d[2][3] + this.d[0][0]*this.d[1][2]*this.d[2][3];
+        res.d[2][0] = this.d[1][1]*this.d[2][3]*this.d[3][0] - this.d[1][3]*this.d[2][1]*this.d[3][0] + this.d[1][3]*this.d[2][0]*this.d[3][1] - this.d[1][0]*this.d[2][3]*this.d[3][1] - this.d[1][1]*this.d[2][0]*this.d[3][3] + this.d[1][0]*this.d[2][1]*this.d[3][3];
+        res.d[2][1] = this.d[0][3]*this.d[2][1]*this.d[3][0] - this.d[0][1]*this.d[2][3]*this.d[3][0] - this.d[0][3]*this.d[2][0]*this.d[3][1] + this.d[0][0]*this.d[2][3]*this.d[3][1] + this.d[0][1]*this.d[2][0]*this.d[3][3] - this.d[0][0]*this.d[2][1]*this.d[3][3];
+        res.d[2][2] = this.d[0][1]*this.d[1][3]*this.d[3][0] - this.d[0][3]*this.d[1][1]*this.d[3][0] + this.d[0][3]*this.d[1][0]*this.d[3][1] - this.d[0][0]*this.d[1][3]*this.d[3][1] - this.d[0][1]*this.d[1][0]*this.d[3][3] + this.d[0][0]*this.d[1][1]*this.d[3][3];
+        res.d[2][3] = this.d[0][3]*this.d[1][1]*this.d[2][0] - this.d[0][1]*this.d[1][3]*this.d[2][0] - this.d[0][3]*this.d[1][0]*this.d[2][1] + this.d[0][0]*this.d[1][3]*this.d[2][1] + this.d[0][1]*this.d[1][0]*this.d[2][3] - this.d[0][0]*this.d[1][1]*this.d[2][3];
+        res.d[3][0] = this.d[1][2]*this.d[2][1]*this.d[3][0] - this.d[1][1]*this.d[2][2]*this.d[3][0] - this.d[1][2]*this.d[2][0]*this.d[3][1] + this.d[1][0]*this.d[2][2]*this.d[3][1] + this.d[1][1]*this.d[2][0]*this.d[3][2] - this.d[1][0]*this.d[2][1]*this.d[3][2];
+        res.d[3][1] = this.d[0][1]*this.d[2][2]*this.d[3][0] - this.d[0][2]*this.d[2][1]*this.d[3][0] + this.d[0][2]*this.d[2][0]*this.d[3][1] - this.d[0][0]*this.d[2][2]*this.d[3][1] - this.d[0][1]*this.d[2][0]*this.d[3][2] + this.d[0][0]*this.d[2][1]*this.d[3][2];
+        res.d[3][2] = this.d[0][2]*this.d[1][1]*this.d[3][0] - this.d[0][1]*this.d[1][2]*this.d[3][0] - this.d[0][2]*this.d[1][0]*this.d[3][1] + this.d[0][0]*this.d[1][2]*this.d[3][1] + this.d[0][1]*this.d[1][0]*this.d[3][2] - this.d[0][0]*this.d[1][1]*this.d[3][2];
+        res.d[3][3] = this.d[0][1]*this.d[1][2]*this.d[2][0] - this.d[0][2]*this.d[1][1]*this.d[2][0] + this.d[0][2]*this.d[1][0]*this.d[2][1] - this.d[0][0]*this.d[1][2]*this.d[2][1] - this.d[0][1]*this.d[1][0]*this.d[2][2] + this.d[0][0]*this.d[1][1]*this.d[2][2];
+
+        let determinant =
+            res.d[0][3]*res.d[1][2]*res.d[2][1]*res.d[3][0] - res.d[0][2]*res.d[1][3]*res.d[2][1]*res.d[3][0] - res.d[0][3]*res.d[1][1]*res.d[2][2]*res.d[3][0] + res.d[0][1]*res.d[1][3]*res.d[2][2]*res.d[3][0] +
+            res.d[0][2]*res.d[1][1]*res.d[2][3]*res.d[3][0] - res.d[0][1]*res.d[1][2]*res.d[2][3]*res.d[3][0] - res.d[0][3]*res.d[1][2]*res.d[2][0]*res.d[3][1] + res.d[0][2]*res.d[1][3]*res.d[2][0]*res.d[3][1] +
+            res.d[0][3]*res.d[1][0]*res.d[2][2]*res.d[3][1] - res.d[0][0]*res.d[1][3]*res.d[2][2]*res.d[3][1] - res.d[0][2]*res.d[1][0]*res.d[2][3]*res.d[3][1] + res.d[0][0]*res.d[1][2]*res.d[2][3]*res.d[3][1] +
+            res.d[0][3]*res.d[1][1]*res.d[2][0]*res.d[3][2] - res.d[0][1]*res.d[1][3]*res.d[2][0]*res.d[3][2] - res.d[0][3]*res.d[1][0]*res.d[2][1]*res.d[3][2] + res.d[0][0]*res.d[1][3]*res.d[2][1]*res.d[3][2] +
+            res.d[0][1]*res.d[1][0]*res.d[2][3]*res.d[3][2] - res.d[0][0]*res.d[1][1]*res.d[2][3]*res.d[3][2] - res.d[0][2]*res.d[1][1]*res.d[2][0]*res.d[3][3] + res.d[0][1]*res.d[1][2]*res.d[2][0]*res.d[3][3] +
+            res.d[0][2]*res.d[1][0]*res.d[2][1]*res.d[3][3] - res.d[0][0]*res.d[1][2]*res.d[2][1]*res.d[3][3] - res.d[0][1]*res.d[1][0]*res.d[2][2]*res.d[3][3] + res.d[0][0]*res.d[1][1]*res.d[2][2]*res.d[3][3];
+
+        let r = 1.0 / determinant;
+        for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < 4; j++) {
+                res.d[i][j] *= r;
+            }
+        }
+        return res;
+    }
+
     public static translate(v: Vec4): Mat4 {
         let res = new Mat4();
         res.d[3][0] = v.d[0];
@@ -77,6 +134,38 @@ export class Mat4 {
         res.d[1][1] = v.d[1];
         res.d[2][2] = v.d[2];
         res.d[3][3] = 1;
+        return res;
+    }
+
+    public static lookAt(eye: Vec4, center: Vec4, up: Vec4): Mat4 {
+        let zAxis = center.sub(eye).normalize();
+        let xAxis = up.cross(zAxis).normalize();
+        let yAxis = zAxis.cross(xAxis).normalize();
+        let res = new Mat4();
+        res.d[0][0] = xAxis.x;
+        res.d[0][1] = xAxis.y;
+        res.d[0][2] = xAxis.z;
+        res.d[1][0] = yAxis.x;
+        res.d[1][1] = yAxis.y;
+        res.d[1][2] = yAxis.z;
+        res.d[2][0] = zAxis.x;
+        res.d[2][1] = zAxis.y;
+        res.d[2][2] = zAxis.z;
+        res.d[0][3] = -xAxis.dot(eye);
+        res.d[1][3] = -yAxis.dot(eye);
+        res.d[2][3] = -zAxis.dot(eye);
+        return res;
+    }
+
+    public static perspective(fov: number, aspect: number, zNear: number, zFar: number): Mat4 {
+        let t = 1.0 / (Math.tan(fov * 0.5));
+        let res = new Mat4();
+        res.d[0][0] = t / aspect;;
+        res.d[1][1] = t;
+        res.d[2][2] = (zFar + zNear) / (zFar - zNear);
+        res.d[2][3] = 1.0;
+        res.d[3][2] = -2.0 * zFar * zNear / (zFar - zNear);
+        res.d[3][3] = 0.0;
         return res;
     }
 }

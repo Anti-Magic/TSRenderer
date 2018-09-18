@@ -1,4 +1,5 @@
 import { Vec4 } from "./Vec4";
+import { Quat } from "./Quat";
 
 export class Mat4 {
     public d: number[][] = [];

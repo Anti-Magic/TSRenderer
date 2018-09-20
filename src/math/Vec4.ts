@@ -1,3 +1,5 @@
+import { Mat4 } from "./Mat4";
+
 export class Vec4 {
     public d: number[];
 
@@ -110,5 +112,14 @@ export class Vec4 {
         res.d[2] = this.d[0] * rhs.d[1] - this.d[1] * rhs.d[0];
         res.d[3] = 0;
         return res;
+    }
+
+    public apply(m: Mat4): Vec4 {
+        let res = new Vec4();
+		res.x = m.d[0][0] * this.x + m.d[0][1] * this.y + m.d[0][2] * this.z + m.d[0][3] * this.w;
+		res.y = m.d[1][0] * this.x + m.d[1][1] * this.y + m.d[1][2] * this.z + m.d[1][3] * this.w;
+		res.z = m.d[2][0] * this.x + m.d[2][1] * this.y + m.d[2][2] * this.z + m.d[2][3] * this.w;
+		res.w = m.d[3][0] * this.x + m.d[3][1] * this.y + m.d[3][2] * this.z + m.d[3][3] * this.w;
+		return res;
     }
 }

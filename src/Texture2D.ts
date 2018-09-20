@@ -23,7 +23,7 @@ export class Texture2D {
 
         let image = new HTMLImageElement();
         image.onload = () => {
-            var context = Texture2D.offScreenCanvas.getContext('2d');
+            let context = Texture2D.offScreenCanvas.getContext('2d');
             context.drawImage(image, 0, 0);
             let imgData = context.getImageData(0, 0, image.width, image.height);
 

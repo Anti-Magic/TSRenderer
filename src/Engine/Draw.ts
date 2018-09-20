@@ -3,10 +3,10 @@ import { FrameBuffer } from "../FrameBuffer";
 
 export class Draw {
     public static drawLine(fbo: FrameBuffer, begin : Vec4, end : Vec4) : void {
-        let dx = Math.floor(end.x - begin.x);
-        let dy = Math.floor(end.y - begin.y);
-        let ux = (dx > 0) ? 1 : -1;
-        let uy = (dy > 0) ? 1 : -1;
+        let dx = Math.floor(end.x) - Math.floor(begin.x);
+        let dy = Math.floor(end.y) - Math.floor(begin.y);
+        let ux = (dx >= 0) ? 1 : -1;
+        let uy = (dy >= 0) ? 1 : -1;
         let x = Math.floor(begin.x);
         let y = Math.floor(begin.y);
         let endx = Math.floor(end.x);

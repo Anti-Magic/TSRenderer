@@ -11,9 +11,13 @@ export class FrameBuffer {
         this.color = new Array<Vec4>(size.x * size.y);
         this.depth = new Array<number>(size.x * size.y);
         this.stencil = new Array<number>(size.x * size.y);
-        for (let x = 0; x < size.x; x++) {
-            for (let y = 0; y < size.y; y++) {
-                let index = x + y * size.x;
+        this.clear();
+    }
+
+    public clear() {
+        for (let x = 0; x < this.size.x; x++) {
+            for (let y = 0; y < this.size.y; y++) {
+                let index = x + y * this.size.x;
                 this.color[index] = new Vec4(0, 0, 0, 1);
                 this.depth[index] = 0;
                 this.stencil[index] = 0;

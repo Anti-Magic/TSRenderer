@@ -9,6 +9,7 @@ export class Device {
     public frameBuffer: FrameBuffer;
     public imgBuffer: ImageData;
     public mainLoop: (dt: number) => void;
+    private lastTime: number;
 
     public constructor() {
         this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -21,12 +22,15 @@ export class Device {
     public start(frameBuffer: FrameBuffer, mainLoop: (dt: number) => void) {
         this.frameBuffer = frameBuffer;
         this.mainLoop = mainLoop;
-        requestAnimationFrame((dt: number) => {
-            this.loop(dt);
+        this.lastTime = 0;
+        requestAnimationFrame((timestamp: number) => {
+            this.loop(timestamp);
         });
     }
 
-    private loop(dt: number) {
+    private loop(timestamp: number) {
+        let dt = (timestamp - this.lastTime) / 1000;
+        this.lastTime = timestamp;
         this.mainLoop(dt);
         for (let x = 0; x < this.width; x++) {
             for (let y = 0; y < this.height; y++) {
@@ -39,8 +43,8 @@ export class Device {
             }
         }
         this.context.putImageData(this.imgBuffer, 0, 0);
-        requestAnimationFrame((dt: number) => {
-            this.loop(dt);
+        requestAnimationFrame((timestamp: number) => {
+            this.loop(timestamp);
         });
     }
 }

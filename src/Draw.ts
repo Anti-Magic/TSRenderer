@@ -1,8 +1,8 @@
-import { Vec4 } from "../math/Vec4";
-import { FrameBuffer } from "../FrameBuffer";
+import { Vec4 } from "./math/Vec4";
+import { FrameBuffer } from "./FrameBuffer";
 
 export class Draw {
-    public static drawLine(fbo: FrameBuffer, begin : Vec4, end : Vec4) : void {
+    public static drawLine(fbo: FrameBuffer, begin: Vec4, end: Vec4) : void {
         let dx = Math.floor(end.x) - Math.floor(begin.x);
         let dy = Math.floor(end.y) - Math.floor(begin.y);
         let ux = (dx >= 0) ? 1 : -1;
@@ -40,7 +40,7 @@ export class Draw {
         }
     }
 
-    public static drawTriangle(begin : Vec4, end : Vec4) : void {
+    public static drawTriangle(v0: Vec4, v1: Vec4, v2: Vec4) : void {
         
     }
 }

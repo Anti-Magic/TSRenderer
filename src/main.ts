@@ -44,8 +44,6 @@ device.start(fbo, (dt: number) => {
 		v1.y = (v1.y + 1) * 0.5 * fbo.size.y;
 		v2.x = (v2.x + 1) * 0.5 * fbo.size.x;
 		v2.y = (v2.y + 1) * 0.5 * fbo.size.y;
-		Draw.drawLine(fbo, v0, v1);
-		Draw.drawLine(fbo, v0, v2);
-		Draw.drawLine(fbo, v1, v2);
+		Draw.drawTriangle(fbo, v0, v1, v2);
 	}
 });

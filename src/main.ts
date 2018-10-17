@@ -13,7 +13,7 @@ let device = new Device();
 let fbo = new FrameBuffer(new Vec4(device.width, device.height));
 for (let x = 0; x < fbo.size.x; x++) {
 	for (let y = 0; y < fbo.size.y; y++) {
-		fbo.setColor(new Vec4(x, y), new Vec4(0, 0, 1, 1));
+		fbo.setColor(x, y, new Vec4(0, 0, 1, 1));
 	}
 }
 

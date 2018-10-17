@@ -56,7 +56,7 @@ export class Draw {
         if (dx > dy) {
             for (; x != endx; x += ux) {
                 if (x >= 0 && x < fbo.size.x && y >= 0 && y < fbo.size.y) {
-                    fbo.setColor(new Vec4(x, y), new Vec4(1, 0, 0, 1));
+                    fbo.setColor(x, y, new Vec4(1, 0, 0, 1));
                 }
                 eps += dy;
                 if ((eps << 1) >= dx) {
@@ -68,7 +68,7 @@ export class Draw {
         else {
             for (; y != endy; y += uy) {
                 if (x >= 0 && x < fbo.size.x && y >= 0 && y < fbo.size.y) {
-                    fbo.setColor(new Vec4(x, y), new Vec4(1, 0, 0, 1));
+                    fbo.setColor(x, y, new Vec4(1, 0, 0, 1));
                 }
                 eps += dx;
                 if ((eps << 1) >= dy) {
@@ -174,9 +174,17 @@ export class Draw {
 	    let dt = 1.0 / (xe - xs);
         for (let x = xs; x <= xe; x++) {
             data.vfm.fromLerp(data.vfl, data.vfr, t);
-            data.vfm.mul(1.0 / data.vfm.position.w);
-            let color = data.shader.frag(data.vfm);
-            data.fbo.setColor(new Vec4(x, y, 0, 1), color);
+            
+            // 为了性能，先进行深度测试，然后执行fragment shader
+            // 通常做法应该是先fragment shader的
+            if (data.vfm.position.z <= data.fbo.getDepth(x, y))
+            {
+                data.vfm.mul(1.0 / data.vfm.position.w);
+                let color = data.shader.frag(data.vfm);
+                data.fbo.setColor(x, y, color);
+                data.fbo.setDepth(x, y, data.vfm.position.z);
+            }
+
             t += dt;
         }
     }

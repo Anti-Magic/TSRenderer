@@ -19,39 +19,39 @@ export class FrameBuffer {
             for (let y = 0; y < this.size.y; y++) {
                 let index = x + y * this.size.x;
                 this.color[index] = new Vec4(0, 0, 0, 1);
-                this.depth[index] = 0;
+                this.depth[index] = 2;
                 this.stencil[index] = 0;
             }
         }
     }
 
-    public setColor(pos: Vec4, value: Vec4) {
-        let index = pos.x + pos.y * this.size.x;
+    public setColor(x: number, y: number, value: Vec4) {
+        let index = x + y * this.size.x;
         this.color[index] = value;
     }
 
-    public getColor(pos: Vec4): Vec4 {
-        let index = pos.x + pos.y * this.size.x;
+    public getColor(x: number, y: number): Vec4 {
+        let index = x + y * this.size.x;
         return this.color[index];
     }
 
-    public setDepth(pos: Vec4, value: number) {
-        let index = pos.x + pos.y * this.size.x;
+    public setDepth(x: number, y: number, value: number) {
+        let index = x + y * this.size.x;
         this.depth[index] = value;
     }
 
-    public getDepth(pos: Vec4): number {
-        let index = pos.x + pos.y * this.size.x;
+    public getDepth(x: number, y: number): number {
+        let index = x + y * this.size.x;
         return this.depth[index]; 
     }
 
-    public setStencil(pos: Vec4, value: number) {
-        let index = pos.x + pos.y * this.size.x;
+    public setStencil(x: number, y: number, value: number) {
+        let index = x + y * this.size.x;
         this.stencil[index] = value;
     }
 
-    public getStencil(pos: Vec4): number {
-        let index = pos.x + pos.y * this.size.x;
+    public getStencil(x: number, y: number): number {
+        let index = x + y * this.size.x;
         return this.stencil[index]; 
     }
 }

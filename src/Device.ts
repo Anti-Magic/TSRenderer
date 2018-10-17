@@ -34,7 +34,7 @@ export class Device {
         this.mainLoop(dt);
         for (let x = 0; x < this.width; x++) {
             for (let y = 0; y < this.height; y++) {
-                let color = this.frameBuffer.getColor(new Vec4(x, y));
+                let color = this.frameBuffer.getColor(x, y);
                 let index = (x + (this.height - y) * this.width) * 4;
                 this.imgBuffer.data[index] = color.x * 255;
                 this.imgBuffer.data[index + 1] = color.y * 255;

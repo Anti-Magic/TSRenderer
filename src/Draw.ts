@@ -1,7 +1,44 @@
 import { Vec4 } from "./math/Vec4";
 import { FrameBuffer } from "./FrameBuffer";
+import { Vertex } from "./Vertex";
 import { Mathf } from "./math/Mathf";
+import { Shader } from "./Shader";
+import { ShaderV2F } from "./ShaderV2F";
 
+class DrawCallModel {
+    public fbo: FrameBuffer;
+    public shader: Shader;
+    public v: ShaderV2F[];
+    // 插值用
+    public vfl: ShaderV2F;
+    public vfr: ShaderV2F;
+    public vfm: ShaderV2F;
+
+    public constructor(fbo: FrameBuffer, shader: Shader) {
+        this.fbo = fbo;
+        this.shader = shader;
+        this.v = [new ShaderV2F(), new ShaderV2F(), new ShaderV2F()];
+        this.vfl = new ShaderV2F();
+        this.vfr = new ShaderV2F();
+        this.vfm = new ShaderV2F();
+    }
+
+    public beforeRaster() {
+        for (let i = 0; i < 3; i++) {
+            let v = this.v[i];
+            v.position.x /= v.position.w;
+            v.position.y /= v.position.w;
+            v.position.z /= v.position.w;
+
+            // 注意这里w分量实际存储的是1/w，因为1/w才与xyz成正比
+            v.position.w = 1.0 / v.position.w;
+
+            v.position.x = (v.position.x + 1) * 0.5 * this.fbo.size.x;
+            v.position.y = (v.position.y + 1) * 0.5 * this.fbo.size.y;
+            v.mul(1.0 / v.position.w);
+        }
+    }
+}
 
 export class Draw {
     public static drawLine(fbo: FrameBuffer, begin: Vec4, end: Vec4) : void {
@@ -42,69 +79,99 @@ export class Draw {
         }
     }
 
-    public static drawTriangle(fbo: FrameBuffer, p1: Vec4, p2: Vec4, p3: Vec4): void {
-        if(p1.y > p2.y) {
-            let temp = p2;
-            p2 = p1;
-            p1 = temp;
-        }
-
-        if(p2.y > p3.y) {
-            let temp = p2;
-            p2 = p3;
-            p3 = temp;
-        }
-
-        if(p1.y > p2.y) {
-            let temp = p2;
-            p2 = p1;
-            p1 = temp;
-        }
-
-        let dp1p2 = p2.y - p1.y > 0 ? (p2.x - p1.x) / (p2.y - p1.y) : 0;
-        let dp1p3 = p3.y - p1.y > 0 ? (p3.x - p1.x) / (p3.y - p1.y) : 0;
-        let dp2p3 = p3.y - p2.y > 0 ? (p3.x - p2.x) / (p3.y - p2.y) : 0;
-        if(dp1p2 == 0)
-        {
-            for (let y = p1.y >> 0; y <= p3.y >> 0; y++) {
-                this.scanLine(fbo, y, p1, p3, p2, p3);
+    public static drawTriangles(fbo: FrameBuffer, shader: Shader, vertices: Vertex[]) {
+        let data = new DrawCallModel(fbo, shader);
+        for (let i = 0; i < vertices.length; i += 3) {
+            data.v[0] = shader.vert(vertices[i]);
+            data.v[1] = shader.vert(vertices[i+1]);
+            data.v[2] = shader.vert(vertices[i+2]);
+            data.beforeRaster();
+            data.v.sort((a: ShaderV2F, b: ShaderV2F): number => {
+                return a.position.y - b.position.y;
+            });
+            if (data.v[0] == data.v[1]) {
+                this.drawFlatBotTriangle(data);
             }
-        }
-        else if(dp2p3 == 0) {
-            for (let y = p1.y >> 0; y <= p2.y >> 0; y++) {
-                this.scanLine(fbo, y, p1, p2, p1, p3);
+            else if (data.v[1] == data.v[2]) {
+                this.drawFlatTopTriangle(data);
             }
-        }
-        else if(dp1p2 > dp1p3) {
-            for (let y = p1.y >> 0; y <= p3.y >> 0; y++) {
-                if(y < p2.y) {
-                    this.scanLine(fbo, y, p1, p3, p1, p2);
-                }
-                else {
-                    this.scanLine(fbo, y, p1, p3, p2, p3);
-                }
-            }
-        }
-        else {
-            for (let y = p1.y >> 0; y < p3.y >> 0; y++)
-            {
-                if(y < p2.y) {
-                    this.scanLine(fbo, y, p1, p2, p1, p3);
-                }
-                else{
-                    this.scanLine(fbo, y , p2, p3, p1, p3);
-                }
+            else {
+                // 先暂存
+                let vd = data.v[0];
+                let vm = data.v[1];
+                let vu = data.v[2];
+                // 多插入一个点，切成平顶和平底2个三角形
+                let t = (vm.position.y - vd.position.y) / (vu.position.y - vd.position.y);
+                let vEx = new ShaderV2F();
+                vEx.fromLerp(vd, vu, t);
+                
+                data.v[0] = vd;
+                data.v[1] = vm;
+                data.v[2] = vEx;
+                this.drawFlatTopTriangle(data);
+                
+                data.v[0] = vEx;
+                data.v[1] = vm;
+                data.v[2] = vu;
+                this.drawFlatBotTriangle(data);
             }
         }
     }
 
-    private static scanLine(fbo: FrameBuffer, y: number, pa: Vec4, pb: Vec4, pc: Vec4, pd: Vec4): void {
-        let gradient1 = pa.y != pb.y ? (y - pa.y) / (pb.y - pa.y) : 1;
-        let gradient2 = pc.y != pd.y ? (y - pc.y) / (pd.y - pc.y) : 1;
-        let sx = Mathf.interpolate(pa.x, pb.x, gradient1) >> 0;
-        let ex = Mathf.interpolate(pc.x, pd.x, gradient2) >> 0;
-        for (let x = sx; x < ex; x++) {
-            fbo.setColor(new Vec4(x, y, 0, 0), new Vec4(1, 0, 0, 1));
+    private static drawFlatTopTriangle(data: DrawCallModel) {
+        //  1-------2
+        //   \     /
+        //    \   /
+        //     \ /
+        //      0
+        if (data.v[1].position.x > data.v[2].position.x) {
+            let tmp = data.v[1];
+            data.v[1] = data.v[2];
+            data.v[2] = tmp;
+        }
+        
+        let ys = Math.floor(data.v[0].position.y);
+        let ye = Math.floor(data.v[2].position.y);
+        let t = 0.0;
+	    let dt = 1.0 / (ye - ys);
+        for (let y = ys; y < ye; y++) {
+            data.vfl.fromLerp(data.v[0], data.v[1], t);
+            data.vfr.fromLerp(data.v[0], data.v[2], t);
+            this.drawScanLine(data);
+            t += dt;
+        }
+    }
+
+    private static drawFlatBotTriangle(data: DrawCallModel) {
+        //      2
+        //     / \
+        //    /   \
+        //   /     \
+        //  0-------1
+        if (data.v[0].position.x > data.v[1].position.x) {
+            let tmp = data.v[0];
+            data.v[0] = data.v[1];
+            data.v[1] = tmp;
+        }
+        
+        let ys = Math.floor(data.v[0].position.y);
+        let ye = Math.floor(data.v[2].position.y);
+        let t = 0.0;
+	    let dt = 1.0 / (ye - ys);
+        for (let y = ys; y < ye; y++) {
+            data.vfl.fromLerp(data.v[0], data.v[2], t);
+            data.vfr.fromLerp(data.v[1], data.v[2], t);
+            this.drawScanLine(data);
+            t += dt;
+        }
+    }
+
+    private static drawScanLine(data: DrawCallModel) {
+        let xs = Math.floor(data.vfl.position.x);
+        let xe = Math.floor(data.vfr.position.x);
+        let y = Math.floor(data.vfl.position.y);
+        for (let x = xs; x <= xe; x++) {
+            data.fbo.setColor(new Vec4(x, y, 0, 1), new Vec4(0, 1, 0, 1));
         }
     }
 }

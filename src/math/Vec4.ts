@@ -122,6 +122,13 @@ export class Vec4 {
         );
     }
 
+    public fromLerp(start: Vec4, end: Vec4, n: number) {
+        this.x = start.x + ((end.x - start.x) * n);
+        this.y = start.y + ((end.y - start.y) * n);
+        this.z = start.z + ((end.z - start.z) * n);
+        this.w = start.w + ((end.w - start.w) * n);
+    }
+
     public static lerp(start: Vec4, end: Vec4, n: number): Vec4 {
         return new Vec4(
             start.x + ((end.x - start.x) * n),

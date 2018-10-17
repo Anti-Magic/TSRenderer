@@ -1,18 +1,16 @@
 import { Vec4 } from "./math/Vec4";
+import { Mathf } from "./math/Mathf";
 
 export class Texture2D {
     public size: Vec4;
-    private d: Vec4[][];
+    public d: Vec4[];
     private static offScreenCanvas: HTMLCanvasElement;
 
     public constructor() {
         this.size = new Vec4(2, 2);
-        this.d = new Array<Vec4[]>(this.size.x);
-        for (let x = 0; x < this.size.x; x++) {
-            this.d[x] = new Array<Vec4>(this.size.y);
-            for (let y = 0; y < this.size.y; y++) {
-                this.d[x][y] = new Vec4(0, 0, 0, 1);
-            }
+        this.d = new Array<Vec4>(this.size.x * this.size.y);
+        for (let i = 0; i < this.d.length; i++) {
+            this.d[i] = new Vec4(0, 0, 0, 1);
         }
     }
 
@@ -21,28 +19,35 @@ export class Texture2D {
             Texture2D.offScreenCanvas = document.createElement('canvas') as HTMLCanvasElement;
         }
 
-        let image = new HTMLImageElement();
+        let image = document.createElement('img');
         image.onload = () => {
+            Texture2D.offScreenCanvas.width = image.width;
+            Texture2D.offScreenCanvas.height = image.height;
             let context = Texture2D.offScreenCanvas.getContext('2d');
             context.drawImage(image, 0, 0);
             let imgData = context.getImageData(0, 0, image.width, image.height);
 
             this.size.x = image.width;
             this.size.y = image.height;
-            this.d = new Array<Vec4[]>(this.size.x);
-            for (let x = 0; x < this.size.x; x++) {
-                this.d[x] = new Array<Vec4>(this.size.y);
-                for (let y = 0; y < this.size.y; y++) {
-                    let index = (x + y * image.width) * 4;
-                    this.d[x][y] = new Vec4(
-                        imgData.data[index],
-                        imgData.data[index + 1],
-                        imgData.data[index + 2],
-                        imgData.data[index + 3]
-                    );
-                }
+            this.d = new Array<Vec4>(this.size.x * this.size.y);
+            for (let i = 0; i < this.d.length; i++) {
+                let index = i * 4;
+                this.d[i] = new Vec4(
+                    imgData.data[index] / 255.0,
+                    imgData.data[index + 1] / 255.0,
+                    imgData.data[index + 2] / 255.0,
+                    imgData.data[index + 3] / 255.0
+                );
             }
         };
         image.src = path;
+    }
+
+    public getColor(x: number, y: number): Vec4 {
+        x = x * this.size.x;
+        y = (1.0 - y) * this.size.y;
+        x = Mathf.clamp(Math.floor(x), 0, this.size.x - 1);
+        y = Mathf.clamp(Math.floor(y), 0, this.size.y - 1);
+        return this.d[x + y * this.size.x];
     }
 }

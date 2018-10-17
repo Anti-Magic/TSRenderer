@@ -6,6 +6,7 @@ import { Device } from "./Device";
 import { Mat4 } from "./math/Mat4";
 import { Quat } from "./math/Quat";
 import { Shader } from "./Shader";
+import { Texture2D } from "./Texture2D";
 
 let device = new Device();
 
@@ -18,9 +19,13 @@ for (let x = 0; x < fbo.size.x; x++) {
 
 let model = new Mat4();
 let view = Mat4.lookAt(new Vec4(0, 2, -3, 1), new Vec4(0, 0, 0, 1), new Vec4(0, 1, 0));
+// let view = Mat4.lookAt(new Vec4(0, 0, -3, 1), new Vec4(0, 0, 0, 1), new Vec4(0, 1, 0));
 let projection = Mat4.perspective(Math.PI / 3, 1.0 * fbo.size.x / fbo.size.y, 0.1, 1000);
 let mvp = model.post(view).post(projection);
-let mesh = MeshPrimitive.quad();
+let mesh = MeshPrimitive.cube();
+let diffuse = new Texture2D();
+diffuse.loadAsync("res/container.png");
+// diffuse.loadAsync("res/test.jpg");
 let shader = new Shader();
 device.start(fbo, (dt: number) => {
 	fbo.clear();
@@ -28,5 +33,6 @@ device.start(fbo, (dt: number) => {
 	model = model.post(rot);
 	mvp = model.post(view).post(projection);
 	shader.mvp = mvp;
+	shader.texture0 = diffuse;
 	Draw.drawTriangles(fbo, shader, mesh.vertices);
 });

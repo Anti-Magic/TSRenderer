@@ -35,7 +35,7 @@ class DrawCallModel {
 
             v.position.x = (v.position.x + 1) * 0.5 * this.fbo.size.x;
             v.position.y = (v.position.y + 1) * 0.5 * this.fbo.size.y;
-            v.mul(1.0 / v.position.w);
+            v.mul(v.position.w);
         }
     }
 }
@@ -89,10 +89,10 @@ export class Draw {
             data.v.sort((a: ShaderV2F, b: ShaderV2F): number => {
                 return a.position.y - b.position.y;
             });
-            if (data.v[0] == data.v[1]) {
+            if (data.v[0].position.y == data.v[1].position.y) {
                 this.drawFlatBotTriangle(data);
             }
-            else if (data.v[1] == data.v[2]) {
+            else if (data.v[1].position.y == data.v[2].position.y) {
                 this.drawFlatTopTriangle(data);
             }
             else {
@@ -170,8 +170,14 @@ export class Draw {
         let xs = Math.floor(data.vfl.position.x);
         let xe = Math.floor(data.vfr.position.x);
         let y = Math.floor(data.vfl.position.y);
+        let t = 0.0;
+	    let dt = 1.0 / (xe - xs);
         for (let x = xs; x <= xe; x++) {
-            data.fbo.setColor(new Vec4(x, y, 0, 1), new Vec4(0, 1, 0, 1));
+            data.vfm.fromLerp(data.vfl, data.vfr, t);
+            data.vfm.mul(1.0 / data.vfm.position.w);
+            let color = data.shader.frag(data.vfm);
+            data.fbo.setColor(new Vec4(x, y, 0, 1), color);
+            t += dt;
         }
     }
 }

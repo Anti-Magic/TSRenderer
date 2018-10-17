@@ -10,11 +10,11 @@ export class ShaderV2F {
     public texcoord3: Vec4 = new Vec4();
 
     public mul(x: number) {
-        this.normal.scale(x);
-        this.texcoord0.scale(x);
-        this.texcoord1.scale(x);
-        this.texcoord2.scale(x);
-        this.texcoord3.scale(x);
+        this.normal = this.normal.scale(x);
+        this.texcoord0 = this.texcoord0.scale(x);
+        this.texcoord1 = this.texcoord1.scale(x);
+        this.texcoord2 = this.texcoord2.scale(x);
+        this.texcoord3 = this.texcoord3.scale(x);
     }
 
     public fromLerp(a: ShaderV2F, b: ShaderV2F, t: number) {

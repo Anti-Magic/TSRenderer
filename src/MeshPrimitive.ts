@@ -53,7 +53,7 @@ export class MeshPrimitive {
         for (let i = 0; i < rawData.length; i += 8) {
             let vertex = new Vertex();
             vertex.position = new Vec4(rawData[i], rawData[i+1], rawData[i+2], 1);
-            vertex.normal = new Vec4(rawData[i+3], rawData[i+4], rawData[i+5], 1);
+            vertex.normal = new Vec4(rawData[i+3], rawData[i+4], rawData[i+5], 0);
             vertex.texcoord = new Vec4(rawData[i+6], rawData[i+7]);
             vertices.push(vertex);
         }
@@ -76,7 +76,7 @@ export class MeshPrimitive {
         for (let i = 0; i < rawData.length; i += 8) {
             let vertex = new Vertex();
             vertex.position = new Vec4(rawData[i], rawData[i+1], rawData[i+2], 1);
-            vertex.normal = new Vec4(rawData[i+3], rawData[i+4], rawData[i+5], 1);
+            vertex.normal = new Vec4(rawData[i+3], rawData[i+4], rawData[i+5], 0);
             vertex.texcoord = new Vec4(rawData[i+6], rawData[i+7]);
             vertices.push(vertex);
         }

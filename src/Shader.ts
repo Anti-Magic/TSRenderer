@@ -3,23 +3,27 @@ import { Vertex } from "./Vertex";
 import { ShaderV2F } from "./ShaderV2F";
 import { Mat4 } from "./math/Mat4";
 import { Texture2D } from "./Texture2D";
-import { Mathf } from "./math/Mathf";
 
-export class Shader {
+class Lighting {
+    public ambient: Vec4;
+    public dir: Vec4;
+    public color: Vec4;
+}
+
+export abstract class Shader {
     public mvp: Mat4;
+    public mModel: Mat4;
+    public mNormal: Mat4;
+    public posView: Vec4;
+    public gloss: number;
+    public lighting: Lighting;
     public texture0: Texture2D;
     public texture1: Texture2D;
 
-    public vert(v: Vertex): ShaderV2F {
-        let o = new ShaderV2F();
-        o.position = v.position.apply(this.mvp);
-        o.normal = v.normal;
-        o.texcoord0 = v.texcoord;
-        return o;
+    public constructor() {
+        this.lighting = new Lighting();
     }
 
-    public frag(f: ShaderV2F): Vec4 {
-        let diffuse = this.texture0.getColor(f.texcoord0.x, f.texcoord0.y);
-        return diffuse;
-    }
+    public abstract vert(v: Vertex): ShaderV2F;
+    public abstract frag(f: ShaderV2F): Vec4;
 }

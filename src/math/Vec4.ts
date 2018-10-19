@@ -81,7 +81,8 @@ export class Vec4 {
     }
 
     public magnitude(): number {
-        return Math.sqrt(this.x * this.x + 
+        return Math.sqrt(
+            this.x * this.x + 
             this.y * this.y + 
             this.z * this.z + 
             this.w * this.w);

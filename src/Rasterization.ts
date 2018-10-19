@@ -5,7 +5,7 @@ import { Mathf } from "./math/Mathf";
 import { Shader } from "./Shader";
 import { ShaderV2F } from "./ShaderV2F";
 
-class DrawCallModel {
+class RasterizationParam {
     public fbo: FrameBuffer;
     public shader: Shader;
     public v: ShaderV2F[];
@@ -22,25 +22,9 @@ class DrawCallModel {
         this.vfr = new ShaderV2F();
         this.vfm = new ShaderV2F();
     }
-
-    public beforeRaster() {
-        for (let i = 0; i < 3; i++) {
-            let v = this.v[i];
-            v.position.x /= v.position.w;
-            v.position.y /= v.position.w;
-            v.position.z /= v.position.w;
-
-            // 注意这里w分量实际存储的是1/w，因为1/w才与xyz成正比
-            v.position.w = 1.0 / v.position.w;
-
-            v.position.x = (v.position.x + 1) * 0.5 * this.fbo.size.x;
-            v.position.y = (v.position.y + 1) * 0.5 * this.fbo.size.y;
-            v.mul(v.position.w);
-        }
-    }
 }
 
-export class Draw {
+export class Rasterization {
     public static drawLine(fbo: FrameBuffer, begin: Vec4, end: Vec4) : void {
         let dx = Math.floor(end.x) - Math.floor(begin.x);
         let dy = Math.floor(end.y) - Math.floor(begin.y);
@@ -80,109 +64,126 @@ export class Draw {
     }
 
     public static drawTriangles(fbo: FrameBuffer, shader: Shader, vertices: Vertex[]) {
-        let data = new DrawCallModel(fbo, shader);
+        let param = new RasterizationParam(fbo, shader);
         for (let i = 0; i < vertices.length; i += 3) {
-            data.v[0] = shader.vert(vertices[i]);
-            data.v[1] = shader.vert(vertices[i+1]);
-            data.v[2] = shader.vert(vertices[i+2]);
-            data.beforeRaster();
-            data.v.sort((a: ShaderV2F, b: ShaderV2F): number => {
+            param.v[0] = shader.vert(vertices[i]);
+            param.v[1] = shader.vert(vertices[i+1]);
+            param.v[2] = shader.vert(vertices[i+2]);
+            
+            for (let i = 0; i < 3; i++) {
+                let v = param.v[i];
+                // 透视除法
+                v.position.x /= v.position.w;
+                v.position.y /= v.position.w;
+                v.position.z /= v.position.w;
+    
+                // 注意这里w分量实际存储的是1/w，因为1/w才与xyz成正比
+                v.position.w = 1.0 / v.position.w;
+
+                v.position.x = (v.position.x + 1) * 0.5 * param.fbo.size.x;
+                v.position.y = (v.position.y + 1) * 0.5 * param.fbo.size.y;
+                
+                // 除以w，即乘1/w，透视插值
+                v.mul(v.position.w);
+            }
+
+            param.v.sort((a: ShaderV2F, b: ShaderV2F): number => {
                 return a.position.y - b.position.y;
             });
-            if (data.v[0].position.y == data.v[1].position.y) {
-                this.drawFlatBotTriangle(data);
+            if (param.v[0].position.y == param.v[1].position.y) {
+                this.drawFlatBotTriangle(param);
             }
-            else if (data.v[1].position.y == data.v[2].position.y) {
-                this.drawFlatTopTriangle(data);
+            else if (param.v[1].position.y == param.v[2].position.y) {
+                this.drawFlatTopTriangle(param);
             }
             else {
                 // 先暂存
-                let vd = data.v[0];
-                let vm = data.v[1];
-                let vu = data.v[2];
+                let vd = param.v[0];
+                let vm = param.v[1];
+                let vu = param.v[2];
                 // 多插入一个点，切成平顶和平底2个三角形
                 let t = (vm.position.y - vd.position.y) / (vu.position.y - vd.position.y);
                 let vEx = new ShaderV2F();
                 vEx.fromLerp(vd, vu, t);
                 
-                data.v[0] = vd;
-                data.v[1] = vm;
-                data.v[2] = vEx;
-                this.drawFlatTopTriangle(data);
+                param.v[0] = vd;
+                param.v[1] = vm;
+                param.v[2] = vEx;
+                this.drawFlatTopTriangle(param);
                 
-                data.v[0] = vEx;
-                data.v[1] = vm;
-                data.v[2] = vu;
-                this.drawFlatBotTriangle(data);
+                param.v[0] = vEx;
+                param.v[1] = vm;
+                param.v[2] = vu;
+                this.drawFlatBotTriangle(param);
             }
         }
     }
 
-    private static drawFlatTopTriangle(data: DrawCallModel) {
+    private static drawFlatTopTriangle(param: RasterizationParam) {
         //  1-------2
         //   \     /
         //    \   /
         //     \ /
         //      0
-        if (data.v[1].position.x > data.v[2].position.x) {
-            let tmp = data.v[1];
-            data.v[1] = data.v[2];
-            data.v[2] = tmp;
+        if (param.v[1].position.x > param.v[2].position.x) {
+            let tmp = param.v[1];
+            param.v[1] = param.v[2];
+            param.v[2] = tmp;
         }
         
-        let ys = Math.floor(data.v[0].position.y);
-        let ye = Math.floor(data.v[2].position.y);
+        let ys = Math.floor(param.v[0].position.y);
+        let ye = Math.floor(param.v[2].position.y);
         let t = 0.0;
 	    let dt = 1.0 / (ye - ys);
         for (let y = ys; y < ye; y++) {
-            data.vfl.fromLerp(data.v[0], data.v[1], t);
-            data.vfr.fromLerp(data.v[0], data.v[2], t);
-            this.drawScanLine(data);
+            param.vfl.fromLerp(param.v[0], param.v[1], t);
+            param.vfr.fromLerp(param.v[0], param.v[2], t);
+            this.drawScanLine(param);
             t += dt;
         }
     }
 
-    private static drawFlatBotTriangle(data: DrawCallModel) {
+    private static drawFlatBotTriangle(param: RasterizationParam) {
         //      2
         //     / \
         //    /   \
         //   /     \
         //  0-------1
-        if (data.v[0].position.x > data.v[1].position.x) {
-            let tmp = data.v[0];
-            data.v[0] = data.v[1];
-            data.v[1] = tmp;
+        if (param.v[0].position.x > param.v[1].position.x) {
+            let tmp = param.v[0];
+            param.v[0] = param.v[1];
+            param.v[1] = tmp;
         }
         
-        let ys = Math.floor(data.v[0].position.y);
-        let ye = Math.floor(data.v[2].position.y);
+        let ys = Math.floor(param.v[0].position.y);
+        let ye = Math.floor(param.v[2].position.y);
         let t = 0.0;
 	    let dt = 1.0 / (ye - ys);
         for (let y = ys; y < ye; y++) {
-            data.vfl.fromLerp(data.v[0], data.v[2], t);
-            data.vfr.fromLerp(data.v[1], data.v[2], t);
-            this.drawScanLine(data);
+            param.vfl.fromLerp(param.v[0], param.v[2], t);
+            param.vfr.fromLerp(param.v[1], param.v[2], t);
+            this.drawScanLine(param);
             t += dt;
         }
     }
 
-    private static drawScanLine(data: DrawCallModel) {
-        let xs = Math.floor(data.vfl.position.x);
-        let xe = Math.floor(data.vfr.position.x);
-        let y = Math.floor(data.vfl.position.y);
+    private static drawScanLine(param: RasterizationParam) {
+        let xs = Math.floor(param.vfl.position.x);
+        let xe = Math.floor(param.vfr.position.x);
+        let y = Math.floor(param.vfl.position.y);
         let t = 0.0;
 	    let dt = 1.0 / (xe - xs);
         for (let x = xs; x <= xe; x++) {
-            data.vfm.fromLerp(data.vfl, data.vfr, t);
+            param.vfm.fromLerp(param.vfl, param.vfr, t);
             
             // 为了性能，先进行深度测试，然后执行fragment shader
             // 通常做法应该是先fragment shader的
-            if (data.vfm.position.z <= data.fbo.getDepth(x, y))
+            if (param.vfm.position.z <= param.fbo.getDepth(x, y))
             {
-                data.vfm.mul(1.0 / data.vfm.position.w);
-                let color = data.shader.frag(data.vfm);
-                data.fbo.setColor(x, y, color);
-                data.fbo.setDepth(x, y, data.vfm.position.z);
+                param.vfm.mul(1.0 / param.vfm.position.w);
+                let color = param.shader.frag(param.vfm);
+                param.fbo.setColor(x, y, color);
+                param.fbo.setDepth(x, y, param.vfm.position.z);
             }
 
             t += dt;

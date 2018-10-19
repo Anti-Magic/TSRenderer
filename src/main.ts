@@ -1,7 +1,7 @@
 import { FrameBuffer } from "./FrameBuffer";
 import { Vec4 } from "./math/Vec4";
 import { MeshPrimitive } from "./MeshPrimitive";
-import { Draw } from "./Draw";
+import { Rasterization } from "./Rasterization";
 import { Device } from "./Device";
 import { Mat4 } from "./math/Mat4";
 import { Quat } from "./math/Quat";
@@ -34,5 +34,5 @@ device.start(fbo, (dt: number) => {
 	mvp = model.post(view).post(projection);
 	shader.mvp = mvp;
 	shader.texture0 = diffuse;
-	Draw.drawTriangles(fbo, shader, mesh.vertices);
+	Rasterization.drawTriangles(fbo, shader, mesh.vertices);
 });

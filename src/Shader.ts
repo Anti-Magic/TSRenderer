@@ -19,11 +19,6 @@ export class Shader {
     }
 
     public frag(f: ShaderV2F): Vec4 {
-        // f.texcoord0.x = 0;
-        // f.texcoord0.y = 0;
-        // let uv = this.texture0.size.mul(f.texcoord0);
-        // uv.x = Mathf.clamp(Math.floor(uv.x), 0, this.texture0.size.x - 1);
-        // uv.y = Mathf.clamp(Math.floor(uv.y), 0, this.texture0.size.y - 1);
         let diffuse = this.texture0.getColor(f.texcoord0.x, f.texcoord0.y);
         return diffuse;
     }

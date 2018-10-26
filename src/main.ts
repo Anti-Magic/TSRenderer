@@ -6,7 +6,8 @@ import { Device } from "./Device";
 import { Mat4 } from "./math/Mat4";
 import { Quat } from "./math/Quat";
 import { Texture2D } from "./Texture2D";
-import { BlinnPhong } from "./shader/BlinnPhong";
+import { ShaderBlinnPhong } from "./shader/BlinnPhong";
+import { ShaderSimple } from "./shader/ShaderSimple";
 
 let device = new Device();
 
@@ -25,12 +26,12 @@ let projection = Mat4.perspective(Math.PI / 3, 1.0 * fbo.size.x / fbo.size.y, 0.
 let mvp = model.post(view).post(projection);
 
 let meshCube = MeshPrimitive.cube();
-let shaderCube = new BlinnPhong();
+let shaderCube = new ShaderBlinnPhong();
 shaderCube.texture0 = new Texture2D("res/container.png");
 shaderCube.texture1 = new Texture2D("res/container_specular.png");
 
 let meshGrandma = MeshPrimitive.FitnessGrandma();
-let shaderGrandma = new BlinnPhong();
+let shaderGrandma = new ShaderSimple();
 shaderGrandma.texture0 = new Texture2D("res/FitnessGrandma_diffuse.jpg");
 shaderGrandma.texture1 = new Texture2D("res/FitnessGrandma_spec.jpg");
 
@@ -57,7 +58,7 @@ device.start(fbo, (dt: number) => {
 	shaderGrandma.lighting.ambient = new Vec4(0.2, 0.2, 0.2, 1);
 	shaderGrandma.lighting.color = new Vec4(1, 1, 1, 1);
 	shaderGrandma.lighting.dir = new Vec4(2, 1, -1, 0);
-	
+
 	Rasterization.drawTriangles(fbo, shaderCube, meshCube);
 	Rasterization.drawTriangles(fbo, shaderGrandma, meshGrandma);
 });

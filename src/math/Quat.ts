@@ -2,38 +2,16 @@ import { Vec4 } from "./Vec4";
 import { Mat4 } from "./Mat4";
 
 export class Quat {
-    public d: number[];
+    public x: number;
+    public y: number;
+    public z: number;
+    public w: number;
 
     public constructor(x=0, y=0, z=0, w=1) {
-        this.d = [x, y, z, w];
-    }
-
-    get x(): number {
-        return this.d[0];
-    }
-    set x(v: number) {
-        this.d[0] = v;
-    }
-
-    get y(): number {
-        return this.d[1];
-    }
-    set y(v: number) {
-        this.d[1] = v;
-    }
-
-    get z(): number {
-        return this.d[2];
-    }
-    set z(v: number) {
-        this.d[2] = v;
-    }
-
-    get w(): number {
-        return this.d[3];
-    }
-    set w(v: number) {
-        this.d[3] = v;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.w = w;
     }
 
     public static fromAxisAngle(axis: Vec4, rad: number): Quat {

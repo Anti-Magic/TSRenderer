@@ -4,7 +4,7 @@ import { Vertex } from "../Vertex";
 import { ShaderV2F } from "../ShaderV2F";
 import { Mathf } from "../math/Mathf";
 
-export class BlinnPhong extends Shader {
+export class ShaderBlinnPhong extends Shader {
     public vert(v: Vertex): ShaderV2F {
         let o = new ShaderV2F();
         o.position = v.position.apply(this.mvp);

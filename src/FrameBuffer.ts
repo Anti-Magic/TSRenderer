@@ -2,37 +2,46 @@ import { Vec4 } from "./math/Vec4";
 
 export class FrameBuffer {
     public size: Vec4;
-    private color: Vec4[];
-    private depth: number[];
-    private stencil: number[];
+    private color: Float32Array;
+    private depth: Float32Array;
+    private stencil: Float32Array;
 
     public constructor(size: Vec4) {
         this.size = size;
-        this.color = new Array<Vec4>(size.x * size.y);
-        this.depth = new Array<number>(size.x * size.y);
-        this.stencil = new Array<number>(size.x * size.y);
+        this.color = new Float32Array(size.x * size.y * 4);
+        this.depth = new Float32Array(size.x * size.y);
+        this.stencil = new Float32Array(size.x * size.y);
         this.clear();
     }
 
-    public clear() {
-        for (let x = 0; x < this.size.x; x++) {
-            for (let y = 0; y < this.size.y; y++) {
-                let index = x + y * this.size.x;
-                this.color[index] = new Vec4(0, 0, 0, 1);
-                this.depth[index] = 2;
-                this.stencil[index] = 0;
-            }
+    public clear(color: Vec4 = null) {
+        color = color || new Vec4(0, 0, 0, 1);
+        for (let i = 0; i < this.depth.length; i++) {
+            this.color[i*4] = color.x;
+            this.color[i*4 + 1] = color.y;
+            this.color[i*4 + 2] = color.z;
+            this.color[i*4 + 3] = color.w;
+            this.depth[i] = 2;
+            this.stencil[i] = 0;
         }
     }
 
     public setColor(x: number, y: number, value: Vec4) {
-        let index = x + y * this.size.x;
-        this.color[index] = value;
+        let index = (x + y * this.size.x) * 4;
+        this.color[index] = value.x;
+        this.color[index + 1] = value.y;
+        this.color[index + 2] = value.z;
+        this.color[index + 3] = value.w;
     }
 
     public getColor(x: number, y: number): Vec4 {
-        let index = x + y * this.size.x;
-        return this.color[index];
+        let index = (x + y * this.size.x) * 4;
+        return new Vec4(
+            this.color[index],
+            this.color[index + 1],
+            this.color[index + 2],
+            this.color[index + 3]
+        );
     }
 
     public setDepth(x: number, y: number, value: number) {

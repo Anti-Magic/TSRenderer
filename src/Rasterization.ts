@@ -70,7 +70,7 @@ export class Rasterization {
         let indices = mesh.indices;
         if (indices != null) {
             for (let i = 0; i < indices.length; i += 3) {
-                this.drawTriangle(fbo, shader, param, 
+                this.drawTriangle(param, 
                     vertices[indices[i]], 
                     vertices[indices[i+1]], 
                     vertices[indices[i+2]]);
@@ -78,7 +78,7 @@ export class Rasterization {
         }
         else {
             for (let i = 0; i < vertices.length; i += 3) {
-                this.drawTriangle(fbo, shader, param, 
+                this.drawTriangle(param, 
                     vertices[i], 
                     vertices[i+1], 
                     vertices[i+2]);
@@ -86,11 +86,10 @@ export class Rasterization {
         }
     }
 
-    public static drawTriangle(fbo: FrameBuffer, shader: Shader, param: RasterizationParam, 
-        v0: Vertex, v1: Vertex, v2: Vertex) {
-        param.v[0] = shader.vert(v0);
-        param.v[1] = shader.vert(v1);
-        param.v[2] = shader.vert(v2);
+    public static drawTriangle(param: RasterizationParam, v0: Vertex, v1: Vertex, v2: Vertex) {
+        param.v[0] = param.shader.vert(v0);
+        param.v[1] = param.shader.vert(v1);
+        param.v[2] = param.shader.vert(v2);
         for (let i = 0; i < 3; i++) {
             let v = param.v[i];
             // 透视除法
@@ -108,9 +107,26 @@ export class Rasterization {
             v.mul(v.position.w);
         }
 
-        param.v.sort((a: ShaderV2F, b: ShaderV2F): number => {
-            return a.position.y - b.position.y;
-        });
+        // profiler看下来，sort的性能较低，改成3个if排序
+        // param.v.sort((a: ShaderV2F, b: ShaderV2F): number => {
+        //     return a.position.y - b.position.y;
+        // });
+        if (param.v[2].position.y < param.v[1].position.y) {
+            let tmp = param.v[2];
+            param.v[2] = param.v[1];
+            param.v[1] = tmp;
+        }
+        if (param.v[1].position.y < param.v[0].position.y) {
+            let tmp = param.v[1];
+            param.v[1] = param.v[0];
+            param.v[0] = tmp;
+        }
+        if (param.v[2].position.y < param.v[1].position.y) {
+            let tmp = param.v[2];
+            param.v[2] = param.v[1];
+            param.v[1] = tmp;
+        }
+
         if (param.v[0].position.y == param.v[1].position.y) {
             this.drawFlatBotTriangle(param);
         }
@@ -198,8 +214,7 @@ export class Rasterization {
             
             // 为了性能，先进行深度测试，然后执行fragment shader
             // 通常做法应该是先fragment shader的
-            if (param.vfm.position.z <= param.fbo.getDepth(x, y))
-            {
+            if (param.vfm.position.z <= param.fbo.getDepth(x, y)) {
                 param.vfm.mul(1.0 / param.vfm.position.w);
                 let color = param.shader.frag(param.vfm);
                 param.fbo.setColor(x, y, color);

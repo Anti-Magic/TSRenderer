@@ -6,11 +6,14 @@ export class Texture2D {
     public d: Vec4[];
     private static offScreenCanvas: HTMLCanvasElement;
 
-    public constructor() {
+    public constructor(path: string = null) {
         this.size = new Vec4(2, 2);
         this.d = new Array<Vec4>(this.size.x * this.size.y);
         for (let i = 0; i < this.d.length; i++) {
             this.d[i] = new Vec4(0, 0, 0, 1);
+        }
+        if (path != null) {
+            this.loadAsync(path);
         }
     }
 

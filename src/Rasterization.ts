@@ -4,6 +4,7 @@ import { Vertex } from "./Vertex";
 import { Mathf } from "./math/Mathf";
 import { Shader } from "./Shader";
 import { ShaderV2F } from "./ShaderV2F";
+import { Mesh } from "./Mesh";
 
 class RasterizationParam {
     public fbo: FrameBuffer;
@@ -63,59 +64,78 @@ export class Rasterization {
         }
     }
 
-    public static drawTriangles(fbo: FrameBuffer, shader: Shader, vertices: Vertex[]) {
+    public static drawTriangles(fbo: FrameBuffer, shader: Shader, mesh: Mesh) {
         let param = new RasterizationParam(fbo, shader);
-        for (let i = 0; i < vertices.length; i += 3) {
-            param.v[0] = shader.vert(vertices[i]);
-            param.v[1] = shader.vert(vertices[i+1]);
-            param.v[2] = shader.vert(vertices[i+2]);
+        let vertices = mesh.vertices;
+        let indices = mesh.indices;
+        if (indices != null) {
+            for (let i = 0; i < indices.length; i += 3) {
+                this.drawTriangle(fbo, shader, param, 
+                    vertices[indices[i]], 
+                    vertices[indices[i+1]], 
+                    vertices[indices[i+2]]);
+            }
+        }
+        else {
+            for (let i = 0; i < vertices.length; i += 3) {
+                this.drawTriangle(fbo, shader, param, 
+                    vertices[i], 
+                    vertices[i+1], 
+                    vertices[i+2]);
+            }
+        }
+    }
+
+    public static drawTriangle(fbo: FrameBuffer, shader: Shader, param: RasterizationParam, 
+        v0: Vertex, v1: Vertex, v2: Vertex) {
+        param.v[0] = shader.vert(v0);
+        param.v[1] = shader.vert(v1);
+        param.v[2] = shader.vert(v2);
+        for (let i = 0; i < 3; i++) {
+            let v = param.v[i];
+            // 透视除法
+            v.position.x /= v.position.w;
+            v.position.y /= v.position.w;
+            v.position.z /= v.position.w;
+
+            // 注意这里w分量实际存储的是1/w，因为1/w才与xyz成正比
+            v.position.w = 1.0 / v.position.w;
+
+            v.position.x = (v.position.x + 1) * 0.5 * param.fbo.size.x;
+            v.position.y = (v.position.y + 1) * 0.5 * param.fbo.size.y;
             
-            for (let i = 0; i < 3; i++) {
-                let v = param.v[i];
-                // 透视除法
-                v.position.x /= v.position.w;
-                v.position.y /= v.position.w;
-                v.position.z /= v.position.w;
-    
-                // 注意这里w分量实际存储的是1/w，因为1/w才与xyz成正比
-                v.position.w = 1.0 / v.position.w;
+            // 除以w，即乘1/w，透视插值
+            v.mul(v.position.w);
+        }
 
-                v.position.x = (v.position.x + 1) * 0.5 * param.fbo.size.x;
-                v.position.y = (v.position.y + 1) * 0.5 * param.fbo.size.y;
-                
-                // 除以w，即乘1/w，透视插值
-                v.mul(v.position.w);
-            }
-
-            param.v.sort((a: ShaderV2F, b: ShaderV2F): number => {
-                return a.position.y - b.position.y;
-            });
-            if (param.v[0].position.y == param.v[1].position.y) {
-                this.drawFlatBotTriangle(param);
-            }
-            else if (param.v[1].position.y == param.v[2].position.y) {
-                this.drawFlatTopTriangle(param);
-            }
-            else {
-                // 先暂存
-                let vd = param.v[0];
-                let vm = param.v[1];
-                let vu = param.v[2];
-                // 多插入一个点，切成平顶和平底2个三角形
-                let t = (vm.position.y - vd.position.y) / (vu.position.y - vd.position.y);
-                let vEx = new ShaderV2F();
-                vEx.fromLerp(vd, vu, t);
-                
-                param.v[0] = vd;
-                param.v[1] = vm;
-                param.v[2] = vEx;
-                this.drawFlatTopTriangle(param);
-                
-                param.v[0] = vEx;
-                param.v[1] = vm;
-                param.v[2] = vu;
-                this.drawFlatBotTriangle(param);
-            }
+        param.v.sort((a: ShaderV2F, b: ShaderV2F): number => {
+            return a.position.y - b.position.y;
+        });
+        if (param.v[0].position.y == param.v[1].position.y) {
+            this.drawFlatBotTriangle(param);
+        }
+        else if (param.v[1].position.y == param.v[2].position.y) {
+            this.drawFlatTopTriangle(param);
+        }
+        else {
+            // 先暂存
+            let vd = param.v[0];
+            let vm = param.v[1];
+            let vu = param.v[2];
+            // 多插入一个点，切成平顶和平底2个三角形
+            let t = (vm.position.y - vd.position.y) / (vu.position.y - vd.position.y);
+            let vEx = new ShaderV2F();
+            vEx.fromLerp(vd, vu, t);
+            
+            param.v[0] = vd;
+            param.v[1] = vm;
+            param.v[2] = vEx;
+            this.drawFlatTopTriangle(param);
+            
+            param.v[0] = vEx;
+            param.v[1] = vm;
+            param.v[2] = vu;
+            this.drawFlatBotTriangle(param);
         }
     }
 

@@ -18,31 +18,46 @@ for (let x = 0; x < fbo.size.x; x++) {
 }
 
 let model = new Mat4();
-let cameraPos = new Vec4(0, 2, -3, 1);
+let cameraPos = new Vec4(0, 3, -3, 1);
 let view = Mat4.lookAt(cameraPos, new Vec4(0, 0, 0, 1), new Vec4(0, 1, 0));
 // let view = Mat4.lookAt(new Vec4(0, 0, -3, 1), new Vec4(0, 0, 0, 1), new Vec4(0, 1, 0));
 let projection = Mat4.perspective(Math.PI / 3, 1.0 * fbo.size.x / fbo.size.y, 0.1, 1000);
 let mvp = model.post(view).post(projection);
-let mesh = MeshPrimitive.cube();
-let diffuse = new Texture2D();
-diffuse.loadAsync("res/container.png");
-let specular = new Texture2D();
-specular.loadAsync("res/container_specular.png");
-let shader = new BlinnPhong();
+
+let meshCube = MeshPrimitive.cube();
+let shaderCube = new BlinnPhong();
+shaderCube.texture0 = new Texture2D("res/container.png");
+shaderCube.texture1 = new Texture2D("res/container_specular.png");
+
+let meshGrandma = MeshPrimitive.FitnessGrandma();
+let shaderGrandma = new BlinnPhong();
+shaderGrandma.texture0 = new Texture2D("res/FitnessGrandma_diffuse.jpg");
+shaderGrandma.texture1 = new Texture2D("res/FitnessGrandma_spec.jpg");
+
 device.start(fbo, (dt: number) => {
 	fbo.clear();
 	let rot = Mat4.rotate(Quat.fromAxisAngle(new Vec4(0, 1, 0), Math.PI / 3 * dt));
 	model = model.post(rot);
 	mvp = model.post(view).post(projection);
-	shader.mvp = mvp;
-	shader.mModel = model;
-	shader.mNormal = model.inverse().transpose();
-	shader.posView = cameraPos;
-	shader.gloss = 32;
-	shader.lighting.ambient = new Vec4(0.2, 0.2, 0.2, 1);
-	shader.lighting.color = new Vec4(1, 1, 1, 1);
-	shader.lighting.dir = new Vec4(2, 1, -1, 0);
-	shader.texture0 = diffuse;
-	shader.texture1 = specular;
-	Rasterization.drawTriangles(fbo, shader, mesh.vertices);
+	
+	shaderCube.mvp = mvp;
+	shaderCube.mModel = model;
+	shaderCube.mNormal = model.inverse().transpose();
+	shaderCube.posView = cameraPos;
+	shaderCube.gloss = 32;
+	shaderCube.lighting.ambient = new Vec4(0.2, 0.2, 0.2, 1);
+	shaderCube.lighting.color = new Vec4(1, 1, 1, 1);
+	shaderCube.lighting.dir = new Vec4(2, 1, -1, 0);
+
+	shaderGrandma.mvp = mvp;
+	shaderGrandma.mModel = model;
+	shaderGrandma.mNormal = model.inverse().transpose();
+	shaderGrandma.posView = cameraPos;
+	shaderGrandma.gloss = 32;
+	shaderGrandma.lighting.ambient = new Vec4(0.2, 0.2, 0.2, 1);
+	shaderGrandma.lighting.color = new Vec4(1, 1, 1, 1);
+	shaderGrandma.lighting.dir = new Vec4(2, 1, -1, 0);
+	
+	Rasterization.drawTriangles(fbo, shaderCube, meshCube);
+	Rasterization.drawTriangles(fbo, shaderGrandma, meshGrandma);
 });

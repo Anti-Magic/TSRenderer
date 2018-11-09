@@ -21,7 +21,7 @@ export class FrameBuffer {
             this.color[i*4 + 1] = color.y;
             this.color[i*4 + 2] = color.z;
             this.color[i*4 + 3] = color.w;
-            this.depth[i] = 2;
+            this.depth[i] = 0;
             this.stencil[i] = 0;
         }
     }

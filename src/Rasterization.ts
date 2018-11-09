@@ -197,13 +197,9 @@ export class Rasterization {
         let ye = Math.min(yel, yer);
 
         for (let y = ys; y < ye; y++) {
-            let t = (y - ys) / (yel - ys);
-            param.vfl.fromLerp(param.v[0], param.v[1], t);
-            param.vfl.position.y = y;
-            t = (y - ys) / (yer - ys);
-            param.vfr.fromLerp(param.v[0], param.v[2], t);
-            param.vfr.position.y = y;
-            this.drawScanLine(param);
+            param.vfl.fromLerp(param.v[0], param.v[1], (y - ys) / (yel - ys));
+            param.vfr.fromLerp(param.v[0], param.v[2], (y - ys) / (yer - ys));
+            this.drawScanLine(param, y);
         }
     }
 
@@ -219,20 +215,15 @@ export class Rasterization {
         let ye = Math.floor(param.v[2].position.y);
 
         for (let y = ys; y < ye; y++) {
-            let t = (ye - y) / (ye - ysl);
-            param.vfl.fromLerp(param.v[2], param.v[0], t);
-            param.vfl.position.y = y;
-            t = (ye - y) / (ye - ysr);
-            param.vfr.fromLerp(param.v[2], param.v[1], t);
-            param.vfr.position.y = y;
-            this.drawScanLine(param);
+            param.vfl.fromLerp(param.v[2], param.v[0], (ye - y) / (ye - ysl));
+            param.vfr.fromLerp(param.v[2], param.v[1], (ye - y) / (ye - ysr));
+            this.drawScanLine(param, y);
         }
     }
 
-    private static drawScanLine(param: RasterizationParam) {
+    private static drawScanLine(param: RasterizationParam, y: number) {
         let xs = Math.floor(param.vfl.position.x);
         let xe = Math.floor(param.vfr.position.x);
-        let y = Math.floor(param.vfl.position.y);
 
         for (let x = xs; x < xe; x++) {
             let t = (x - xs) / (xe - xs);
@@ -240,12 +231,31 @@ export class Rasterization {
             
             // 为了性能，先进行深度测试，然后执行fragment shader
             // 通常做法应该是先fragment shader的
-            if (param.vfm.position.z <= param.fbo.getDepth(x, y)) {
+            // 用1/w做测试，值越大的离相机越近，depth buffer初始化为0
+            let depth = param.vfm.position.w;
+            if (this.depthTest(depth, param.fbo.getDepth(x, y))) {
                 param.vfm.mul(1.0 / param.vfm.position.w);
                 let color = param.shader.frag(param.vfm);
+                color = this.alphaBlend(color, param.fbo.getColor(x, y));
                 param.fbo.setColor(x, y, color);
-                param.fbo.setDepth(x, y, param.vfm.position.z);
+                param.fbo.setDepth(x, y, depth);
             }
         }
+    }
+
+    private static depthTest(src: number, dst: number) {
+        // TODO depthFunc
+        return src >= dst;
+    }
+
+    private static alphaBlend(src: Vec4, dst: Vec4) {
+        // TODO blendFunc
+        let alpha = src.w;
+        return new Vec4(
+            src.x * alpha + dst.x * (1 - alpha),
+            src.y * alpha + dst.y * (1 - alpha),
+            src.z * alpha + dst.z * (1 - alpha),
+            1
+        );
     }
 }

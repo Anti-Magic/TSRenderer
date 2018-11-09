@@ -41,7 +41,7 @@ export class Rasterization {
         if (dx > dy) {
             for (; x != endx; x += ux) {
                 if (x >= 0 && x < fbo.size.x && y >= 0 && y < fbo.size.y) {
-                    fbo.setColor(x, y, new Vec4(1, 0, 0, 1));
+                    fbo.setColor(x, y, new Vec4(0, 0, 1, 1));
                 }
                 eps += dy;
                 if ((eps << 1) >= dx) {
@@ -86,10 +86,35 @@ export class Rasterization {
         }
     }
 
-    public static drawTriangle(param: RasterizationParam, v0: Vertex, v1: Vertex, v2: Vertex) {
+    private static cvvCulling(v: ShaderV2F) {
+        let w = v.position.w;
+        if (v.position.x < -w || v.position.x > w) {
+            return true;
+        }
+        if (v.position.y < -w || v.position.y > w) {
+            return true;
+        }
+        if (v.position.z < -w || v.position.z > w) {
+            return true;
+        }
+        return false;
+    }
+
+    private static swap(arr: ShaderV2F[], idx1: number, idx2: number) {
+        let tmp = arr[idx1];
+        arr[idx1] = arr[idx2];
+        arr[idx2] = tmp;
+    }
+
+    private static drawTriangle(param: RasterizationParam, v0: Vertex, v1: Vertex, v2: Vertex) {
         param.v[0] = param.shader.vert(v0);
         param.v[1] = param.shader.vert(v1);
         param.v[2] = param.shader.vert(v2);
+        if (this.cvvCulling(param.v[0]) 
+            || this.cvvCulling(param.v[1])
+            || this.cvvCulling(param.v[2])) {
+            return;
+        }
         for (let i = 0; i < 3; i++) {
             let v = param.v[i];
             // 透视除法
@@ -112,25 +137,25 @@ export class Rasterization {
         //     return a.position.y - b.position.y;
         // });
         if (param.v[2].position.y < param.v[1].position.y) {
-            let tmp = param.v[2];
-            param.v[2] = param.v[1];
-            param.v[1] = tmp;
+            this.swap(param.v, 1, 2);
         }
         if (param.v[1].position.y < param.v[0].position.y) {
-            let tmp = param.v[1];
-            param.v[1] = param.v[0];
-            param.v[0] = tmp;
+            this.swap(param.v, 0, 1);
         }
         if (param.v[2].position.y < param.v[1].position.y) {
-            let tmp = param.v[2];
-            param.v[2] = param.v[1];
-            param.v[1] = tmp;
+            this.swap(param.v, 1, 2);
         }
 
         if (param.v[0].position.y == param.v[1].position.y) {
+            if (param.v[0].position.x > param.v[1].position.x) {
+                this.swap(param.v, 0, 1);
+            }
             this.drawFlatBotTriangle(param);
         }
         else if (param.v[1].position.y == param.v[2].position.y) {
+            if (param.v[1].position.x > param.v[2].position.x) {
+                this.swap(param.v, 1, 2);
+            }
             this.drawFlatTopTriangle(param);
         }
         else {
@@ -140,17 +165,22 @@ export class Rasterization {
             let vu = param.v[2];
             // 多插入一个点，切成平顶和平底2个三角形
             let t = (vm.position.y - vd.position.y) / (vu.position.y - vd.position.y);
-            let vEx = new ShaderV2F();
-            vEx.fromLerp(vd, vu, t);
+            let pEx = Vec4.lerp(vd.position, vu.position, t);
             
             param.v[0] = vd;
             param.v[1] = vm;
-            param.v[2] = vEx;
+            param.v[2] = vu; // pEx
+            if (param.v[1].position.x > pEx.x) {
+                this.swap(param.v, 1, 2);
+            }
             this.drawFlatTopTriangle(param);
             
-            param.v[0] = vEx;
+            param.v[0] = vd; // pEx
             param.v[1] = vm;
             param.v[2] = vu;
+            if (pEx.x > param.v[1].position.x) {
+                this.swap(param.v, 0, 1);
+            }
             this.drawFlatBotTriangle(param);
         }
     }
@@ -161,21 +191,19 @@ export class Rasterization {
         //    \   /
         //     \ /
         //      0
-        if (param.v[1].position.x > param.v[2].position.x) {
-            let tmp = param.v[1];
-            param.v[1] = param.v[2];
-            param.v[2] = tmp;
-        }
-        
+        let yel = Math.floor(param.v[1].position.y);
+        let yer = Math.floor(param.v[2].position.y);
         let ys = Math.floor(param.v[0].position.y);
-        let ye = Math.floor(param.v[2].position.y);
-        let t = 0.0;
-	    let dt = 1.0 / (ye - ys);
+        let ye = Math.min(yel, yer);
+
         for (let y = ys; y < ye; y++) {
+            let t = (y - ys) / (yel - ys);
             param.vfl.fromLerp(param.v[0], param.v[1], t);
+            param.vfl.position.y = y;
+            t = (y - ys) / (yer - ys);
             param.vfr.fromLerp(param.v[0], param.v[2], t);
+            param.vfr.position.y = y;
             this.drawScanLine(param);
-            t += dt;
         }
     }
 
@@ -185,21 +213,19 @@ export class Rasterization {
         //    /   \
         //   /     \
         //  0-------1
-        if (param.v[0].position.x > param.v[1].position.x) {
-            let tmp = param.v[0];
-            param.v[0] = param.v[1];
-            param.v[1] = tmp;
-        }
-        
-        let ys = Math.floor(param.v[0].position.y);
+        let ysl = Math.floor(param.v[0].position.y);
+        let ysr = Math.floor(param.v[1].position.y);
+        let ys = Math.max(ysl, ysr);
         let ye = Math.floor(param.v[2].position.y);
-        let t = 0.0;
-	    let dt = 1.0 / (ye - ys);
+
         for (let y = ys; y < ye; y++) {
-            param.vfl.fromLerp(param.v[0], param.v[2], t);
-            param.vfr.fromLerp(param.v[1], param.v[2], t);
+            let t = (ye - y) / (ye - ysl);
+            param.vfl.fromLerp(param.v[2], param.v[0], t);
+            param.vfl.position.y = y;
+            t = (ye - y) / (ye - ysr);
+            param.vfr.fromLerp(param.v[2], param.v[1], t);
+            param.vfr.position.y = y;
             this.drawScanLine(param);
-            t += dt;
         }
     }
 
@@ -207,9 +233,9 @@ export class Rasterization {
         let xs = Math.floor(param.vfl.position.x);
         let xe = Math.floor(param.vfr.position.x);
         let y = Math.floor(param.vfl.position.y);
-        let t = 0.0;
-	    let dt = 1.0 / (xe - xs);
-        for (let x = xs; x <= xe; x++) {
+
+        for (let x = xs; x < xe; x++) {
+            let t = (x - xs) / (xe - xs);
             param.vfm.fromLerp(param.vfl, param.vfr, t);
             
             // 为了性能，先进行深度测试，然后执行fragment shader
@@ -220,8 +246,6 @@ export class Rasterization {
                 param.fbo.setColor(x, y, color);
                 param.fbo.setDepth(x, y, param.vfm.position.z);
             }
-
-            t += dt;
         }
     }
 }

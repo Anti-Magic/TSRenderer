@@ -46,11 +46,25 @@ export class Texture2D {
         image.src = path;
     }
 
-    public getColor(x: number, y: number): Vec4 {
+    public getColorPoint(x: number, y: number): Vec4 {
         x = x * this.size.x;
         y = (1.0 - y) * this.size.y;
         x = Mathf.clamp(Math.floor(x), 0, this.size.x - 1);
         y = Mathf.clamp(Math.floor(y), 0, this.size.y - 1);
         return this.d[x + y * this.size.x];
+    }
+
+    public getColorBilinear(x: number, y: number): Vec4 {
+        x = x * this.size.x;
+        y = (1.0 - y) * this.size.y;
+        x = Mathf.clamp(Math.floor(x), 0, this.size.x - 1);
+        y = Mathf.clamp(Math.floor(y), 0, this.size.y - 1);
+        let x1 = Mathf.clamp(x + 1, 0, this.size.x - 1);
+        let y1 = Mathf.clamp(y + 1, 0, this.size.y - 1);
+        return this.d[x + y * this.size.x]
+            .add(this.d[x1 + y * this.size.x])
+            .add(this.d[x + y1 * this.size.x])
+            .add(this.d[x1 + y1 * this.size.x])
+            .scale(0.25);
     }
 }

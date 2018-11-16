@@ -8,6 +8,7 @@ import { Quat } from "./math/Quat";
 import { Texture2D } from "./Texture2D";
 import { ShaderBlinnPhong } from "./shader/BlinnPhong";
 import { ShaderSimple } from "./shader/ShaderSimple";
+import { ShaderTest } from "./shader/ShaderTest";
 
 let device = new Device();
 
@@ -34,6 +35,23 @@ let meshGrandma = MeshPrimitive.FitnessGrandma();
 let shaderGrandma = new ShaderSimple();
 shaderGrandma.texture0 = new Texture2D("res/FitnessGrandma_diffuse.jpg");
 shaderGrandma.texture1 = new Texture2D("res/FitnessGrandma_spec.jpg");
+
+// alpha blend test
+// let mesh1 = MeshPrimitive.quad();
+// let shaderMesh1 = new ShaderTest();
+// shaderMesh1.color = new Vec4(1, 0, 0, 0.4);
+// let mesh2 = MeshPrimitive.quad();
+// let shaderMesh2 = new ShaderTest();
+// shaderMesh2.color = new Vec4(0, 1, 0, 0.4);
+// let modelMesh1 = Mat4.translate(new Vec4(-0.2, 0, 0, 1));
+// let modelMesh2 = Mat4.translate(new Vec4(0.2, 0, -0.1, 1));
+// shaderMesh1.mvp = modelMesh1.post(view).post(projection);
+// shaderMesh2.mvp = modelMesh2.post(view).post(projection);
+// device.start(fbo, (dt: number) => {
+// 	fbo.clear();
+// 	Rasterization.drawTriangles(fbo, shaderMesh1, mesh1);
+// 	Rasterization.drawTriangles(fbo, shaderMesh2, mesh2);
+// });
 
 device.start(fbo, (dt: number) => {
 	fbo.clear();

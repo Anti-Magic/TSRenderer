@@ -20,8 +20,8 @@ export class ShaderBlinnPhong extends Shader {
         let lightDir = this.lighting.dir.normalize();
         let viewDir = this.posView.sub(worldPos).normalize();
         let halfDir = lightDir.add(viewDir).normalize();
-        let diffColor = this.texture0.getColor(f.texcoord0.x, f.texcoord0.y);
-        let specColor = this.texture1.getColor(f.texcoord0.x, f.texcoord0.y);
+        let diffColor = this.texture0.getColorBilinear(f.texcoord0.x, f.texcoord0.y);
+        let specColor = this.texture1.getColorBilinear(f.texcoord0.x, f.texcoord0.y);
         let ambient = this.lighting.ambient.mul(diffColor);
         let diffuse = this.lighting.color.mul(diffColor).scale(normal.dot(lightDir));
         let specular = this.lighting.color.mul(specColor).scale(Math.pow(Mathf.clamp(normal.dot(halfDir)), this.gloss));

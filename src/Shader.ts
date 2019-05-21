@@ -2,7 +2,7 @@ import { Vec4 } from "./math/Vec4";
 import { Vertex } from "./Vertex";
 import { ShaderV2F } from "./ShaderV2F";
 import { Mat4 } from "./math/Mat4";
-import { Texture2D } from "./Texture2D";
+import { Texture } from "./Texture";
 
 class Lighting {
     public ambient: Vec4;
@@ -17,8 +17,8 @@ export abstract class Shader {
     public posView: Vec4;
     public gloss: number;
     public lighting: Lighting;
-    public texture0: Texture2D;
-    public texture1: Texture2D;
+    public texture0: Texture;
+    public texture1: Texture;
 
     public constructor() {
         this.lighting = new Lighting();

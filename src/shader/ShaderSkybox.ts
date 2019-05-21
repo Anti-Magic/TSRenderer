@@ -4,11 +4,12 @@ import { Vertex } from "../Vertex";
 import { ShaderV2F } from "../ShaderV2F";
 import { Mathf } from "../math/Mathf";
 
-export class ShaderSimple extends Shader {
+export class ShaderSkybox extends Shader {
     public vert(v: Vertex): ShaderV2F {
         let o = new ShaderV2F();
+        o.texcoord0 = v.position;
         o.position = v.position.apply(this.mvp);
-        o.texcoord0 = v.texcoord;
+        o.position = new Vec4(o.position.x, o.position.y, o.position.w, o.position.w);
         return o;
     }
 

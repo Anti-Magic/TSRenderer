@@ -88,6 +88,62 @@ export class MeshPrimitive {
         return mesh;
     }
 
+    public static skybox(): Mesh {
+        let vertices = new Array<Vertex>();
+        let rawVertices = [
+            // positions
+            -1.0,  1.0, -1.0,
+            -1.0, -1.0, -1.0,
+            1.0, -1.0, -1.0,
+            1.0, -1.0, -1.0,
+            1.0,  1.0, -1.0,
+            -1.0,  1.0, -1.0,
+
+            -1.0, -1.0,  1.0,
+            -1.0, -1.0, -1.0,
+            -1.0,  1.0, -1.0,
+            -1.0,  1.0, -1.0,
+            -1.0,  1.0,  1.0,
+            -1.0, -1.0,  1.0,
+
+            1.0, -1.0, -1.0,
+            1.0, -1.0,  1.0,
+            1.0,  1.0,  1.0,
+            1.0,  1.0,  1.0,
+            1.0,  1.0, -1.0,
+            1.0, -1.0, -1.0,
+
+            -1.0, -1.0,  1.0,
+            -1.0,  1.0,  1.0,
+            1.0,  1.0,  1.0,
+            1.0,  1.0,  1.0,
+            1.0, -1.0,  1.0,
+            -1.0, -1.0,  1.0,
+
+            -1.0,  1.0, -1.0,
+            1.0,  1.0, -1.0,
+            1.0,  1.0,  1.0,
+            1.0,  1.0,  1.0,
+            -1.0,  1.0,  1.0,
+            -1.0,  1.0, -1.0,
+
+            -1.0, -1.0, -1.0,
+            -1.0, -1.0,  1.0,
+            1.0, -1.0, -1.0,
+            1.0, -1.0, -1.0,
+            -1.0, -1.0,  1.0,
+            1.0, -1.0,  1.0
+        ];
+        for (let i = 0; i < rawVertices.length; i += 3) {
+            let vertex = new Vertex();
+            vertex.position = new Vec4(rawVertices[i], rawVertices[i+1], rawVertices[i+2], 1);
+            vertices.push(vertex);
+        }
+        let mesh = new Mesh();
+        mesh.vertices = vertices;
+        return mesh;
+    }
+
     public static FitnessGrandma(): Mesh {
         let vertices = new Array<Vertex>();
         let rawVertices = [

@@ -27,6 +27,9 @@ export class FrameBuffer {
     }
 
     public setColor(x: number, y: number, value: Vec4) {
+        if (x < 0 || x >= this.size.x || y < 0 || y >= this.size.y) {
+            return;
+        }
         let index = (x + y * this.size.x) * 4;
         this.color[index] = value.x;
         this.color[index + 1] = value.y;
@@ -45,6 +48,9 @@ export class FrameBuffer {
     }
 
     public setDepth(x: number, y: number, value: number) {
+        if (x < 0 || x >= this.size.x || y < 0 || y >= this.size.y) {
+            return;
+        }
         let index = x + y * this.size.x;
         this.depth[index] = value;
     }
@@ -55,6 +61,9 @@ export class FrameBuffer {
     }
 
     public setStencil(x: number, y: number, value: number) {
+        if (x < 0 || x >= this.size.x || y < 0 || y >= this.size.y) {
+            return;
+        }
         let index = x + y * this.size.x;
         this.stencil[index] = value;
     }

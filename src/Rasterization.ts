@@ -94,7 +94,12 @@ export class Rasterization {
         if (v.position.y < -w || v.position.y > w) {
             return true;
         }
-        if (v.position.z < -w || v.position.z > w) {
+        // [-w, w]
+        // if (v.position.z < -w || v.position.z > w) {
+        //     return true;
+        // }
+        // [0, w]
+        if (v.position.z < 0 || v.position.z > w) {
             return true;
         }
         return false;
@@ -195,8 +200,10 @@ export class Rasterization {
         let yer = Math.floor(param.v[2].position.y);
         let ys = Math.floor(param.v[0].position.y);
         let ye = Math.min(yel, yer);
+        let loopLow = Mathf.clamp(ys, 0, param.fbo.size.y);
+        let loopHigh = Mathf.clamp(ye, 0, param.fbo.size.y);
 
-        for (let y = ys; y < ye; y++) {
+        for (let y = loopLow; y < loopHigh; y++) {
             param.vfl.fromLerp(param.v[0], param.v[1], (y - ys) / (yel - ys));
             param.vfr.fromLerp(param.v[0], param.v[2], (y - ys) / (yer - ys));
             this.drawScanLine(param, y);
@@ -213,8 +220,10 @@ export class Rasterization {
         let ysr = Math.floor(param.v[1].position.y);
         let ys = Math.max(ysl, ysr);
         let ye = Math.floor(param.v[2].position.y);
+        let loopLow = Mathf.clamp(ys, 0, param.fbo.size.y);
+        let loopHigh = Mathf.clamp(ye, 0, param.fbo.size.y);
 
-        for (let y = ys; y < ye; y++) {
+        for (let y = loopLow; y < loopHigh; y++) {
             param.vfl.fromLerp(param.v[2], param.v[0], (ye - y) / (ye - ysl));
             param.vfr.fromLerp(param.v[2], param.v[1], (ye - y) / (ye - ysr));
             this.drawScanLine(param, y);
@@ -224,8 +233,10 @@ export class Rasterization {
     private static drawScanLine(param: RasterizationParam, y: number) {
         let xs = Math.floor(param.vfl.position.x);
         let xe = Math.floor(param.vfr.position.x);
+        let loopLow = Mathf.clamp(xs, 0, param.fbo.size.x);
+        let loopHigh = Mathf.clamp(xe, 0, param.fbo.size.x);
 
-        for (let x = xs; x < xe; x++) {
+        for (let x = loopLow; x < loopHigh; x++) {
             let t = (x - xs) / (xe - xs);
             param.vfm.fromLerp(param.vfl, param.vfr, t);
             

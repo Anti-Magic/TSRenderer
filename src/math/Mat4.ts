@@ -170,18 +170,18 @@ export class Mat4 {
     }
 
     public static perspective(fovy: number, aspect: number, zNear: number, zFar: number): Mat4 {
-        let t = 1.0 / (Math.tan(fovy * 0.5));
+        let t = 1.0 / Math.tan(fovy * 0.5);
         let res = new Mat4();
         res.d[0][0] = t / aspect;
         res.d[1][1] = t;
         res.d[2][3] = 1.0;
         res.d[3][3] = 0.0;
         // [-1, 1]
-        res.d[2][2] = (zFar + zNear) / (zFar - zNear);
-        res.d[3][2] = -2.0 * zFar * zNear / (zFar - zNear);
+        // res.d[2][2] = (zFar + zNear) / (zFar - zNear);
+        // res.d[3][2] = (-2.0 * zFar * zNear) / (zFar - zNear);
         // [0, 1]
-        // res.d[2][2] = zFar / (zFar - zNear);
-        // res.d[3][2] = -(zFar * zNear) / (zFar - zNear);
+        res.d[2][2] = zFar / (zFar - zNear);
+        res.d[3][2] = -(zFar * zNear) / (zFar - zNear);
         return res;
     }
 }

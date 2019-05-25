@@ -1,5 +1,4 @@
 import { FrameBuffer } from "./FrameBuffer";
-import { Vec4 } from "./math/Vec4";
 
 export class Device {
     public canvas: HTMLCanvasElement;

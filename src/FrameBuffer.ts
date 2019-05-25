@@ -1,12 +1,13 @@
+import { Vec2 } from "./math/Vec2";
 import { Vec4 } from "./math/Vec4";
 
 export class FrameBuffer {
-    public size: Vec4;
+    public size: Vec2;
     private color: Float32Array;
     private depth: Float32Array;
     private stencil: Float32Array;
 
-    public constructor(size: Vec4) {
+    public constructor(size: Vec2) {
         this.size = size;
         this.color = new Float32Array(size.x * size.y * 4);
         this.depth = new Float32Array(size.x * size.y);

@@ -1,4 +1,4 @@
-import { Vec4 } from "./Vec4";
+import { Vec3 } from "./Vec3";
 import { Mat4 } from "./Mat4";
 
 export class Quat {
@@ -14,7 +14,7 @@ export class Quat {
         this.w = w;
     }
 
-    public static fromAxisAngle(axis: Vec4, rad: number): Quat {
+    public static fromAxisAngle(axis: Vec3, rad: number): Quat {
         let halfRad = rad * 0.5;
         let sin = Math.sin(halfRad);
         return new Quat(
@@ -25,7 +25,7 @@ export class Quat {
         );
     }
 
-    public static fromEular(v: Vec4): Quat {
+    public static fromEular(v: Vec3): Quat {
         let sx = Math.sin(v.x * 0.5);
         let cx = Math.cos(v.x * 0.5);
         let sy = Math.sin(v.y * 0.5);

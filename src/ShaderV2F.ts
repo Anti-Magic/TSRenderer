@@ -1,5 +1,4 @@
 import { Vec4 } from "./math/Vec4";
-import { Mathf } from "./math/Mathf";
 
 export class ShaderV2F {
     public position: Vec4 = new Vec4();

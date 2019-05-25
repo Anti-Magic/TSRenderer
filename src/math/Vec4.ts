@@ -1,3 +1,5 @@
+import { Vec2 } from "../math/Vec2";
+import { Vec3 } from "../math/Vec3";
 import { Mat4 } from "./Mat4";
 
 export class Vec4 {
@@ -63,7 +65,8 @@ export class Vec4 {
             this.x * this.x + 
             this.y * this.y + 
             this.z * this.z + 
-            this.w * this.w);
+            this.w * this.w
+        );
     }
 
     public normalize(): Vec4 {
@@ -115,5 +118,13 @@ export class Vec4 {
             start.z + (end.z - start.z) * n,
             start.w + (end.w - start.w) * n,
         );
+    }
+
+    public static fromVec2(v: Vec2, z: number, w: number) {
+        return new Vec4(v.x, v.y, z, w);
+    }
+
+    public static fromVec3(v: Vec3, w: number) {
+        return new Vec4(v.x, v.y, v.z, w);
     }
 }

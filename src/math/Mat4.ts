@@ -1,4 +1,4 @@
-import { Vec4 } from "./Vec4";
+import { Vec3 } from "./Vec3";
 import { Quat } from "./Quat";
 
 export class Mat4 {
@@ -90,7 +90,7 @@ export class Mat4 {
         return res;
     }
 
-    public static translate(v: Vec4): Mat4 {
+    public static translate(v: Vec3): Mat4 {
         return new Mat4(
             1,   0,   0,   0,
             0,   1,   0,   0,
@@ -145,7 +145,7 @@ export class Mat4 {
         return res;
     }
 
-    public static scale(v: Vec4): Mat4 {
+    public static scale(v: Vec3): Mat4 {
         return new Mat4(
             v.x, 0,   0,   0,
             0,   v.y, 0,   0,
@@ -154,7 +154,7 @@ export class Mat4 {
         );
     }
 
-    public static lookAt(eye: Vec4, center: Vec4, up: Vec4): Mat4 {
+    public static lookAt(eye: Vec3, center: Vec3, up: Vec3): Mat4 {
         let zAxis = center.sub(eye).normalize();
         let xAxis = up.cross(zAxis).normalize();
         let yAxis = zAxis.cross(xAxis).normalize();

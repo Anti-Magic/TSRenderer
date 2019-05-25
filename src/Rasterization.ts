@@ -256,7 +256,7 @@ export class Rasterization {
 
     private static depthTest(src: number, dst: number) {
         // TODO depthFunc
-        return src >= dst;
+        return src <= 1 && src >= dst;
     }
 
     private static alphaBlend(src: Vec4, dst: Vec4) {

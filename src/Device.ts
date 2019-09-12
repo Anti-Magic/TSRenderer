@@ -1,4 +1,5 @@
 import { FrameBuffer } from "./FrameBuffer";
+import { Mathf } from "./math/Mathf";
 
 export class Device {
     public canvas: HTMLCanvasElement;
@@ -18,8 +19,11 @@ export class Device {
         this.imgBuffer = new ImageData(this.width, this.height);
     }
 
-    public start(frameBuffer: FrameBuffer, mainLoop: (dt: number) => void) {
+    public setFrameBuffer(frameBuffer: FrameBuffer) {
         this.frameBuffer = frameBuffer;
+    }
+
+    public start(mainLoop: (dt: number) => void) {
         this.mainLoop = mainLoop;
         this.lastTime = 0;
         requestAnimationFrame((timestamp: number) => {
@@ -31,19 +35,23 @@ export class Device {
         let dt = (timestamp - this.lastTime) / 1000;
         this.lastTime = timestamp;
         this.mainLoop(dt);
+        this.draw();
+        requestAnimationFrame((timestamp: number) => {
+            this.loop(timestamp);
+        });
+    }
+
+    public draw() {
         for (let x = 0; x < this.width; x++) {
             for (let y = 0; y < this.height; y++) {
                 let color = this.frameBuffer.getColor(x, y);
                 let index = (x + (this.height - y) * this.width) * 4;
-                this.imgBuffer.data[index] = color.x * 255;
-                this.imgBuffer.data[index + 1] = color.y * 255;
-                this.imgBuffer.data[index + 2] = color.z * 255;
-                this.imgBuffer.data[index + 3] = color.w * 255;
+                this.imgBuffer.data[index] = Mathf.clamp(color.x * 255, 0, 255);
+                this.imgBuffer.data[index + 1] = Mathf.clamp(color.y * 255, 0, 255);
+                this.imgBuffer.data[index + 2] = Mathf.clamp(color.z * 255, 0, 255);
+                this.imgBuffer.data[index + 3] = Mathf.clamp(color.w * 255, 0, 255);
             }
         }
         this.context.putImageData(this.imgBuffer, 0, 0);
-        requestAnimationFrame((timestamp: number) => {
-            this.loop(timestamp);
-        });
     }
 }

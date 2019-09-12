@@ -65,11 +65,11 @@ export class MeshPrimitive {
     public static quad(): Mesh {
         let vertices = new Array<Vertex>();
         let rawVertices = [
-            // Positions     // Normals     // Texture Coords
-            0.5, 0.5, 0.0,   0.0, 0.0, 1.0, 1.0, 1.0,
-            0.5, -0.5, 0.0,  0.0, 0.0, 1.0, 1.0, 0.0,
-            -0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-            -0.5, 0.5, 0.0,  0.0, 0.0, 1.0, 0.0, 1.0,
+            // Positions     // Normals      // Texture Coords
+            0.5, 0.5, 0.0,   0.0, 0.0, -1.0, 1.0, 1.0,
+            0.5, -0.5, 0.0,  0.0, 0.0, -1.0, 1.0, 0.0,
+            -0.5, -0.5, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0,
+            -0.5, 0.5, 0.0,  0.0, 0.0, -1.0, 0.0, 1.0,
         ];
         let rawIndices = [
             3, 1, 0,

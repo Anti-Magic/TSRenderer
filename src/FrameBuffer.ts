@@ -73,4 +73,17 @@ export class FrameBuffer {
         let index = x + y * this.size.x;
         return this.stencil[index]; 
     }
+
+    public hdr2ldr() {
+        let max = 0;
+        for (let i = 0; i < this.color.length; i++) {
+            max = Math.max(max, this.color[i]);
+        }
+        for (let i = 0; i < this.color.length; i++) {
+            this.color[i] /= max;
+        }
+        for (let i = 3; i < this.color.length; i += 4) {
+            this.color[i] = 1.0;
+        }
+    }
 }

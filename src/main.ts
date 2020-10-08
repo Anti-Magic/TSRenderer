@@ -16,9 +16,11 @@ import { SceneManager } from "./engine/SceneManager";
 import { SceneModelTest } from "./scene/SceneModelTest";
 import { SceneBlendTest } from "./scene/SceneBlendTest";
 import { SceneSkyboxTest } from "./scene/SceneSkyboxTest";
+import { SceneDebug } from "./scene/SceneDebug";
 
 let device = new Device();
 let sceneManager = new SceneManager();
-sceneManager.changeScene(new SceneModelTest(device));
+sceneManager.changeScene(new SceneDebug(device));
+device.startLoop((dt) => sceneManager.update(dt));
 // sceneManager.changeScene(new SceneBlendTest(device));
 // sceneManager.changeScene(new SceneSkyboxTest(device));

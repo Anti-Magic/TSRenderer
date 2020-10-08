@@ -31,13 +31,13 @@ export class SceneModelTest extends Scene {
         shaderCube.texture0 = new Texture2D("res/container.png");
         shaderCube.texture1 = new Texture2D("res/container_specular.png");
 
-        let meshGrandma = MeshPrimitive.FitnessGrandma();
-        let shaderGrandma = new ShaderSimple();
-        shaderGrandma.texture0 = new Texture2D("res/FitnessGrandma_diffuse.jpg");
-        shaderGrandma.texture1 = new Texture2D("res/FitnessGrandma_spec.jpg");
+        // let meshGrandma = MeshPrimitive.FitnessGrandma();
+        // let shaderGrandma = new ShaderSimple();
+        // shaderGrandma.texture0 = new Texture2D("res/FitnessGrandma_diffuse.jpg");
+        // shaderGrandma.texture1 = new Texture2D("res/FitnessGrandma_spec.jpg");
 
         this.device.setFrameBuffer(fbo);
-        this.device.start((dt: number) => {
+        this.device.startLoop((dt: number) => {
             fbo.clear();
             let rot = Mat4.rotate(Quat.fromAxisAngle(new Vec3(0, 1, 0), Math.PI / 3 * dt));
             model = model.post(rot);
@@ -52,17 +52,17 @@ export class SceneModelTest extends Scene {
             shaderCube.lighting.color = new Vec4(1, 1, 1, 1);
             shaderCube.lighting.dir = new Vec4(2, 1, -1, 0);
 
-            shaderGrandma.mvp = mvp;
-            shaderGrandma.mModel = model;
-            shaderGrandma.mNormal = model.inverse().transpose();
-            shaderGrandma.posView = Vec4.fromVec3(cameraPos, 0);
-            shaderGrandma.gloss = 32;
-            shaderGrandma.lighting.ambient = new Vec4(0.2, 0.2, 0.2, 1);
-            shaderGrandma.lighting.color = new Vec4(1, 1, 1, 1);
-            shaderGrandma.lighting.dir = new Vec4(2, 1, -1, 0);
+            // shaderGrandma.mvp = mvp;
+            // shaderGrandma.mModel = model;
+            // shaderGrandma.mNormal = model.inverse().transpose();
+            // shaderGrandma.posView = Vec4.fromVec3(cameraPos, 0);
+            // shaderGrandma.gloss = 32;
+            // shaderGrandma.lighting.ambient = new Vec4(0.2, 0.2, 0.2, 1);
+            // shaderGrandma.lighting.color = new Vec4(1, 1, 1, 1);
+            // shaderGrandma.lighting.dir = new Vec4(2, 1, -1, 0);
 
-            // Rasterization.drawTriangles(fbo, shaderCube, meshCube);
-            Rasterization.drawTriangles(fbo, shaderGrandma, meshGrandma);
+            Rasterization.drawTriangles(fbo, shaderCube, meshCube);
+            // Rasterization.drawTriangles(fbo, shaderGrandma, meshGrandma);
         });
     }
 }

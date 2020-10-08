@@ -1,6 +1,7 @@
 import { Vec4 } from "./math/Vec4";
 import { Mathf } from "./math/Mathf";
 import { Texture } from "./Texture";
+import { Vec3 } from "./math/Vec3";
 
 export class Texture2D extends Texture {
     public size: Vec4;
@@ -8,9 +9,9 @@ export class Texture2D extends Texture {
     public filterMode: Texture.FilterMode;
     private static offScreenCanvas: HTMLCanvasElement;
 
-    public constructor(path: string = null) {
+    public constructor(path: string = null, filterMode: Texture.FilterMode = Texture.FilterMode.Bilinear) {
         super();
-        this.filterMode = Texture.FilterMode.Bilinear;
+        this.filterMode = filterMode;
         this.size = new Vec4(2, 2);
         this.d = new Array<Vec4>(this.size.x * this.size.y);
         for (let i = 0; i < this.d.length; i++) {
@@ -53,19 +54,19 @@ export class Texture2D extends Texture {
     public getColor(pos: Vec4): Vec4 {
         let x = pos.x * this.size.x;
         let y = (1.0 - pos.y) * this.size.y;
-        x = Mathf.clamp(Math.floor(x), 0, this.size.x - 1);
-        y = Mathf.clamp(Math.floor(y), 0, this.size.y - 1);
+        x = Mathf.clamp(x, 0, this.size.x - 1);
+        y = Mathf.clamp(y, 0, this.size.y - 1);
         if (this.filterMode == Texture.FilterMode.Point) {
-            return this.d[x + y * this.size.x];
+            return this.d[Math.floor(x) + Math.floor(y) * this.size.x];
         }
         else {
-            let x1 = Mathf.clamp(x + 1, 0, this.size.x - 1);
-            let y1 = Mathf.clamp(y + 1, 0, this.size.y - 1);
-            return this.d[x + y * this.size.x]
-                .add(this.d[x1 + y * this.size.x])
-                .add(this.d[x + y1 * this.size.x])
-                .add(this.d[x1 + y1 * this.size.x])
-                .scale(0.25);
+            let ld = this.d[Math.floor(x) + Math.floor(y) * this.size.x];
+            let rd = this.d[Math.ceil(x) + Math.floor(y) * this.size.x];
+            let lu = this.d[Math.floor(x) + Math.ceil(y) * this.size.x];
+            let ru = this.d[Math.ceil(x) + Math.ceil(y) * this.size.x];
+            let hd = Vec4.lerp(ld, rd, x - Math.floor(x));
+            let hu = Vec4.lerp(lu, ru, x - Math.floor(x));
+            return Vec4.lerp(hd, hu, y - Math.floor(y));
         }
     }
 }

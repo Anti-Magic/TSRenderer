@@ -115,11 +115,11 @@ export class Rasterization {
         param.v[0] = param.shader.vert(v0);
         param.v[1] = param.shader.vert(v1);
         param.v[2] = param.shader.vert(v2);
-        if (this.cvvCulling(param.v[0]) 
-            || this.cvvCulling(param.v[1])
-            || this.cvvCulling(param.v[2])) {
-            return;
-        }
+        // if (this.cvvCulling(param.v[0]) 
+        //     || this.cvvCulling(param.v[1])
+        //     || this.cvvCulling(param.v[2])) {
+        //     return;
+        // }
         for (let i = 0; i < 3; i++) {
             let v = param.v[i];
             // 透视除法

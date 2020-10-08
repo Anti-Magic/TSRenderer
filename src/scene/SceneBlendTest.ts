@@ -36,7 +36,7 @@ export class SceneBlendTest extends Scene {
         let modelMesh2 = Mat4.translate(new Vec3(0.2, 0, -0.1));
 
         this.device.setFrameBuffer(fbo);
-        this.device.start((dt: number) => {
+        this.device.startLoop((dt: number) => {
             fbo.clear();
 
             let rot = Mat4.rotate(Quat.fromAxisAngle(new Vec3(0, 1, 0), Math.PI / 3 * dt));

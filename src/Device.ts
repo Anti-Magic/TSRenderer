@@ -23,7 +23,7 @@ export class Device {
         this.frameBuffer = frameBuffer;
     }
 
-    public start(mainLoop: (dt: number) => void) {
+    public startLoop(mainLoop: (dt: number) => void) {
         this.mainLoop = mainLoop;
         this.lastTime = 0;
         requestAnimationFrame((timestamp: number) => {

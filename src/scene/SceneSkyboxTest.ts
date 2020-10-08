@@ -41,7 +41,7 @@ export class SceneSkyboxTest extends Scene {
         ]);
 
         this.device.setFrameBuffer(fbo);
-        this.device.start((dt: number) => {
+        this.device.startLoop((dt: number) => {
             fbo.clear();
             let pos = Mat4.translate(new Vec3(0, 0, -0.5 * dt));
             // let rot = Mat4.rotate(Quat.fromAxisAngle(new Vec4(0, 1, 0), Math.PI / 3 * dt));
